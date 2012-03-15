@@ -7,11 +7,14 @@ import Physics.Particle as Particle
 
 
 type RigidBody = (Particle, Matrix, Matrix, Vector)
-(particle, setParticle,
- inertiaTensor, setInertiaTensor,
- orientation, setOrientation,
- angularVelocity, setAngularVelocity)
- = namedTuple4
+particle = fst4
+setParticle = setFst4
+inertiaTensor = snd4
+setInertiaTensor = setSnd4
+orientation = third4
+setOrientation = setThird4
+angularVelocity = fourth4
+setAngularVelocity = setFourth4
 mass = ((.) Particle.mass particle)
 position = ((.) Particle.position particle)
 velocity = ((.) Particle.velocity particle)

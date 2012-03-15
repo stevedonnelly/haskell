@@ -1,9 +1,9 @@
 
 module Physics.Dynamics where
+import Algebra.Vector as Vector
 import Control.Exception.Base
 import Data.List as List
-import Algebra.Vector as Vector
-import Extensions.Prelude as PreludeExt
+import Prelude.Extensions as PreludeExt
 
 
 integrateVelocity :: Fractional r => r -> r -> r -> r

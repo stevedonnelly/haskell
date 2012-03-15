@@ -1,23 +1,25 @@
 
 module Physics.RigidBody2d where
+import Algebra.Vector as Vector
 import Data.List as List
 import Data.Ratio as Ratio
-import Algebra.Vector as Vector
-import Extensions.Data.Ratio as RatioExt
-import Extensions.Data.Tuple as TupleExt
-import Extensions.Prelude as PreludeExt
+import Data.Ratio.Extensions as RatioExt
+import Data.Tuple.Extensions as TupleExt
 import Geometry.Vector2d as Vector2d
 import Physics.Dynamics as Dynamics
 import qualified Physics.Particle as Particle
+import Prelude.Extensions as PreludeExt
 
 
 type RigidBody2d = (Particle.Particle, Rational, Rational, Rational)
-
-(particle, setParticle,
- inertiaMoment, setInertiaMoment,
- orientation, setOrientation,
- angularVelocity, setAngularVelocity)
- = namedTuple4
+particle = fst4
+setParticle = setFst4
+inertiaMoment = snd4
+setInertiaMoment = setSnd4
+orientation = third4
+setOrientation = setThird4
+angularVelocity = fourth4
+setAngularVelocity = setFourth4
  
 mass = ((.) Particle.mass particle)
 position = ((.) Particle.position particle)

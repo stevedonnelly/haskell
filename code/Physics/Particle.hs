@@ -1,19 +1,21 @@
 
 module Physics.Particle where
+import Algebra.Vector as Vector
 import Control.Exception.Base
 import Data.List as List
 import Data.Ratio as Ratio
-import Algebra.Vector as Vector
-import Extensions.Prelude as PreludeExt
-import Extensions.Data.Tuple as TupleExt
+import Data.Tuple.Extensions as TupleExt
 import Physics.Dynamics as Dynamics
+import Prelude.Extensions as PreludeExt
 
 
 type Particle = (Rational, Vector, Vector)
-(mass, setMass,
- position, setPosition,
- velocity, setVelocity)
- = namedTuple3
+mass = fst3
+setMass = setFst3
+position = snd3
+setPosition = setSnd3
+velocity = third3
+setVelocity = setThird3
 
 
 move = \particle time -> (setPosition particle (Dynamics.move (position particle) (velocity particle) time))
