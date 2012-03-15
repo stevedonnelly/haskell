@@ -2,6 +2,9 @@
 module Data.Tuple.Extensions where
 import Data.Tuple as Tuple
 
+setSubelement :: (a -> b -> a) -> (a -> b) -> (b -> c -> b) -> (a -> c -> a)
+setSubelement = \setOuter getInner setInner tuple value -> (setOuter tuple (setInner (getInner tuple) value))
+
 setFst (a, b) x = (x, b)
 setSnd (a, b) x = (a, x)
 
