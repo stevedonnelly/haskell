@@ -11,6 +11,10 @@ import Prelude.Extensions as PreludeExt
 type Matrix = [Vector]
 
 fromRowList = id
+toRowList = id
+
+fromRowLists = ((.) fromRowList (List.map Vector.fromList))
+toRowLists = ((.) (List.map Vector.toList) toRowList)
 
 size = \m -> let
     rows = (List.length m)
