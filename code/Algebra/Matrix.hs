@@ -12,9 +12,12 @@ type Matrix = [Vector]
 
 fromRowList = id
 toRowList = id
-
+fromRowArray = ((.) fromRowList Map.elems)
+toRowArray = ((.) ListExt.toArray toRowList)
 fromRowLists = ((.) fromRowList (List.map Vector.fromList))
 toRowLists = ((.) (List.map Vector.toList) toRowList)
+fromRowArrays = ((.) fromRowArray (Map.map Vector.fromArray))
+toRowArrays = ((.) (Map.map Vector.toArray) toRowArray)
 
 size = \m -> let
     rows = (List.length m)

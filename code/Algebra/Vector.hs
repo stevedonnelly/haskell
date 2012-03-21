@@ -2,6 +2,7 @@
 module Algebra.Vector where
 import Control.Exception.Base
 import Data.List as List
+import Data.List.Extensions as ListExt
 import Data.Ratio as Ratio
 import Data.Ratio.Extensions as RatioExt
 import Prelude.Extensions as PreludeExt
@@ -9,11 +10,10 @@ import Prelude.Extensions as PreludeExt
 
 type Vector = [Rational]
 
-fromList :: [Rational] -> Vector
 fromList = id
-
-toList :: Vector -> [Rational]
 toList = id
+fromArray = ((.) Algebra.Vector.fromList Map.elems)
+toArray = ((.) ListExt.toArray Algebra.Vector.toList)
 
 size = List.length
 sameSize = \a b -> ((==) (size a) (size b))
