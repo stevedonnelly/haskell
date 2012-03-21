@@ -11,6 +11,8 @@ notNull = ((.) not List.null)
 count :: Eq a => [a] -> a -> Int
 count = \list x -> (List.length (List.filter ((==) x) list))
 
+map2 = \function first second -> (List.map (uncurry function) (zip first second))
+
 product = \as bs -> let
     zipRow = \a -> let
         zipCell = \b -> (a, b)
