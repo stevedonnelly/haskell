@@ -5,12 +5,23 @@ import Data.List as List
 
 rowReduction = \matrix -> let
     compareRows = \index a b -> (compare (Vector.element a index) (Vector.element b index))
-    maxRow = \rows index -> (List.maximizeBy (compareRows index) rows)
+    maximizeRow = \rows index -> (List.maximizeBy (compareRows index) rows)
     (rows, columns) = (Matrix.size matrix)
     rowReduction = \matrix row column -> let
-        remaining_rows = (List.drop row (Matrix.toRowList matrix))
-        max_row = (maxRow (tail remaining_rows) column)
-        zero_pivot = ((==) (Vector.element max_row column) 0)
-        current_row = (Vector.add (head remaining_rows) (maxRow (tail remaining_rows) column))
-        normalized_row = (Vector.scale ((/) 1 (Vector.element current_row column)) current_row)
-        
+        at_end = ((||) ((==) row rows) ((==) column columns))
+        no_pivot = ((==) (Vector.element max_row column) 0)
+        skip_column = (rowReduction matrix row ((+) column 1))
+        (previous, remaining) = (List.splitAt row (Matrix.toRowList matrix))
+        max_row = (maximizeRow remaining column)
+        current_row = (Vector.add (head remaining) max_row)
+        pivot_row = (Vector.scale ((/) 1 (Vector.element current_row column)) current_row)
+        subtractPivotRow = \x -> (Vector.subtract x (Vector.scale (Vector.element x column) pivot_row))
+        reduced = (Matrix.fromRowList ((++) 
+            (List.map subtractPivotRow previous) 
+            ((:) pivot_row (List.map subtractPivotRow (tail remaining)))))
+        recurse = (rowReduction reduced ((+) row 1) ((+) column 1))
+        in (ifElse at_end matrix (ifElse no_pivot skip_column recurse))
+    in (rowReduction matrix 0 0)
+
+
+
