@@ -22,6 +22,8 @@ sameSize = \a b -> ((==) (size a) (size b))
 element = \v index -> ((!!) v index)
 
 zero = \n -> (List.replicate n (toRational 0))
+isZero = \v -> (all ((==) (0::Rational)) v)
+notZero = ((.) not isZero)
 
 map = List.map
 map2 = \f a b -> let
