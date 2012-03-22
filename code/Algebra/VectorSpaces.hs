@@ -2,17 +2,18 @@ module Algebra.VectorSpaces where
 import Algebra.Matrix as Matrix
 import Algebra.Vector as Vector
 import Data.List as List
+import Prelude.Extensions as PreludeExt
 
 rowReduction = \matrix -> let
     compareRows = \index a b -> (compare (Vector.element a index) (Vector.element b index))
-    maximizeRow = \rows index -> (List.maximizeBy (compareRows index) rows)
+    maximumRow = \rows index -> (List.maximumBy (compareRows index) rows)
     (rows, columns) = (Matrix.size matrix)
     rowReduction = \matrix row column -> let
         at_end = ((||) ((==) row rows) ((==) column columns))
         no_pivot = ((==) (Vector.element max_row column) 0)
         skip_column = (rowReduction matrix row ((+) column 1))
         (previous, remaining) = (List.splitAt row (Matrix.toRowList matrix))
-        max_row = (maximizeRow remaining column)
+        max_row = (maximumRow remaining column)
         current_row = (Vector.add (head remaining) max_row)
         pivot_row = (Vector.scale ((/) 1 (Vector.element current_row column)) current_row)
         subtractPivotRow = \x -> (Vector.subtract x (Vector.scale (Vector.element x column) pivot_row))

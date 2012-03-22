@@ -4,6 +4,7 @@ import Algebra.Vector as Vector
 import Control.Exception.Base
 import Data.List as List
 import Data.List.Extensions as ListExt
+import Data.Map as Map
 import Data.Ratio as Ratio
 import Prelude.Extensions as PreludeExt
 
@@ -13,7 +14,7 @@ type Matrix = [Vector]
 fromRowList = id
 toRowList = id
 fromRowArray = ((.) fromRowList Map.elems)
-toRowArray = ((.) ListExt.toArray toRowList)
+toRowArray = ((.) ListExt.toArray0 toRowList)
 fromRowLists = ((.) fromRowList (List.map Vector.fromList))
 toRowLists = ((.) (List.map Vector.toList) toRowList)
 fromRowArrays = ((.) fromRowArray (Map.map Vector.fromArray))
@@ -45,7 +46,7 @@ scale = \scalar -> (List.map (Vector.scale scalar))
 
 isValidSize = \m -> let
     equal_row_size = (and (List.map (Vector.sameSize (head m)) (tail m)))
-    in ((||) (null m) equal_row_size)
+    in ((||) (List.null m) equal_row_size)
 
 transpose = \m -> let
     preconditions = (isValidSize m)
