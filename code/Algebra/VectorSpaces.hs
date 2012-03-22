@@ -17,12 +17,14 @@ rowReduction = \matrix -> let
         current_row = (Vector.add (head remaining) max_row)
         pivot_row = (Vector.scale ((/) 1 (Vector.element current_row column)) current_row)
         subtractPivotRow = \x -> (Vector.subtract x (Vector.scale (Vector.element x column) pivot_row))
-        reduced = (Matrix.fromRowList ((++) 
-            (List.map subtractPivotRow previous) 
+        reduced = (Matrix.fromRowList ((++) (List.map subtractPivotRow previous) 
             ((:) pivot_row (List.map subtractPivotRow (tail remaining)))))
         recurse = (rowReduction reduced ((+) row 1) ((+) column 1))
         in (ifElse at_end matrix (ifElse no_pivot skip_column recurse))
     in (rowReduction matrix 0 0)
 
-
+backSubstitution = \matrix output -> let
+    (rows, columns) = (Matrix.size matrix)
+    solveRow = \(success, 
+    
 
