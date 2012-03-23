@@ -3,6 +3,7 @@ import Algebra.Matrix as Matrix
 import Algebra.Vector as Vector
 import Data.List as List
 import Data.List.Extensions as ListExt
+import Data.Maybe as Maybe
 import Prelude.Extensions as PreludeExt
 
 rowReduction = \matrix -> let
@@ -26,14 +27,14 @@ rowReduction = \matrix -> let
 
 backSubstitution = \matrix output -> let
     (row_size, column_size) = (Matrix.size matrix)
-    pivot_rows = (List.takeWhile Vector.notZero (Matrix.toRowList matrix))
+    pivot_rows = (List.takeWhile (List.any ((/=) 0)) (Matrix.toRowLists matrix))
     pivot_indices = (List.map ((.) fromJust (List.elemIndex 1)) pivot_rows)
     without_pivots = (List.map (ListExt.removeIndices pivot_indices) pivot_rows)
     number_of_solutions = ((+) 1 (List.length without_pivots))
     solutionRow = \index -> let
         maybe_pivot_index = (List.elemIndex index pivot_indices)
-        is_pivot = (isJust pivot_index)
-        pivot = (fromJust pivot_index)
+        is_pivot = (isJust maybe_pivot_index)
+        pivot = (fromJust maybe_pivot_index)
         pivot_row = ((:) (Vector.element output pivot) (Vector.fromList ((!!) without_pivots pivot)))
         free_row = (ListExt.replace (List.replicate number_of_solutions 0) index 1)
         in (ifElse is_pivot pivot_row free_row)
@@ -47,7 +48,7 @@ solveLinearSystem = \matrix output -> let
     (rows, columns) = (Matrix.size matrix)
     merged = (ListExt.map2 (++) (Matrix.toRowLists matrix) (List.map (\x -> [x]) (Vector.toList output)))
     reduction = (rowReduction (Matrix.fromRowLists merged))
-    (reduced_matrix, reduced_output) = (List.map (List.splitAt columns) (Matrix.toRowLists reduction))
+    (reduced_matrix, reduced_output) = (unzip (List.map (List.splitAt columns) (Matrix.toRowLists reduction)))
     in (backSubstitution (Matrix.fromRowLists reduced_matrix) (Vector.fromList (List.map head reduced_output)))
 
 

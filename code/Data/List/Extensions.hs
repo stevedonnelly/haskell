@@ -34,6 +34,7 @@ replace = \list index value -> let
     (before, after) = (List.splitAt index list)
     in ((++) before ((:) value (tail after)))
 
+removeIndices :: [Int] -> [a] -> [a]
 removeIndices = \indices list -> let
     removeIndices = \indices list index -> let
         is_end = ((||) (List.null indices) (List.null list))
