@@ -30,6 +30,19 @@ rotateLeft = \list -> (pushLast (tail list) (head list))
 
 rotateRight = \list -> ((:) (last list) (dropLast list))
 
+replace = \list index value -> let
+    (before, after) = (List.splitAt index list)
+    in ((++) before ((:) value (tail after)))
+
+removeIndices = \indices list -> let
+    removeIndices = \indices list index -> let
+        is_end = ((||) (List.null indices) (List.null list))
+        is_match = ((==) (head indices) index)
+        remove = (removeIndices (tail indices) (tail list) ((+) index 1))
+        keep = ((:) (head list) (removeIndices indices (tail list) ((+) index 1)))
+        in (ifElse is_end list (ifElse is_match remove keep))
+    in (removeIndices indices list 0)
+
 splitOn :: Eq a => a -> [a] -> [[a]]
 splitOn = \value list -> let
     splitter = \x (current, lists) -> (ifElse ((==) x value) ([], (:) current lists) ((:) x current, lists))

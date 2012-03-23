@@ -25,20 +25,29 @@ rowReduction = \matrix -> let
     in (rowReduction matrix 0 0)
 
 backSubstitution = \matrix output -> let
-    (rows, columns) = (Matrix.size matrix)
-    freeColumns = \(free_columns, pivot) column -> let
-        is_pivot = ((&&) ((/=) pivot rows) ((==) (Vector.element column pivot) 1))
-        updated_columns = (ifElse (Vector.notZero column) ((:) column free_columns) free_columns)
-        in (ifElse is_pivot (free_columns, (+) pivot 1) (updated_columns, pivot))
-    (free_columns, pivot_rows) = (List.foldl freeColumns ([], 0) (Matrix.toColumnList matrix))
-    is_consistent = (all ((==) 0) (List.drop pivot_rows (Vector.toList output)))
-    in (ifElse is_consistent ((:) output (List.reverse free_columns)) [])
+    (row_size, column_size) = (Matrix.size matrix)
+    pivot_rows = (List.takeWhile Vector.notZero (Matrix.toRowList matrix))
+    pivot_indices = (List.map ((.) fromJust (List.elemIndex 1)) pivot_rows)
+    without_pivots = (List.map (ListExt.removeIndices pivot_indices) pivot_rows)
+    number_of_solutions = ((+) 1 (List.length without_pivots))
+    solutionRow = \index -> let
+        maybe_pivot_index = (List.elemIndex index pivot_indices)
+        is_pivot = (isJust pivot_index)
+        pivot = (fromJust pivot_index)
+        pivot_row = ((:) (Vector.element output pivot) (Vector.fromList ((!!) without_pivots pivot)))
+        free_row = (ListExt.replace (List.replicate number_of_solutions 0) index 1)
+        in (ifElse is_pivot pivot_row free_row)
+    solution_space = (List.map solutionRow (ListExt.range0 column_size))
+    solutions = (List.map Vector.fromList (List.transpose solution_space))
+    non_zero_solutions = (ifElse (notNull solutions) ((:) (head solutions) (List.filter Vector.notZero (tail solutions))) solutions)
+    is_consistent = (all ((==) 0) (List.drop (List.length pivot_rows) (Vector.toList output)))
+    in (ifElse is_consistent non_zero_solutions [])
 
 solveLinearSystem = \matrix output -> let
     (rows, columns) = (Matrix.size matrix)
     merged = (ListExt.map2 (++) (Matrix.toRowLists matrix) (List.map (\x -> [x]) (Vector.toList output)))
     reduction = (rowReduction (Matrix.fromRowLists merged))
-    (reduced_matrix, reduced_output) = (List.splitAt columns (Matrix.toRowLists reduction))
+    (reduced_matrix, reduced_output) = (List.map (List.splitAt columns) (Matrix.toRowLists reduction))
     in (backSubstitution (Matrix.fromRowLists reduced_matrix) (Vector.fromList (List.map head reduced_output)))
 
 
