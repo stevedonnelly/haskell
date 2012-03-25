@@ -2,20 +2,27 @@
 module Geometry.LineSegment where
 import Algebra.Vector as V
 import Data.Tuple.Extensions as TupleExt
+import qualified Geometry.Line as Line
 import Prelude.Extensions as PreludeExt
 
 
 type LineSegment = (Vector, Vector)
-endPoint0 = fst
-endPoint1 = snd
-setEndPoint0 = setFst
-setEndPoint1 = setSnd
+endpoint0 = fst
+endpoint1 = snd
+setEndpoint0 = setFst
+setEndpoint1 = setSnd
 
-closestPoint = \(a, b) point -> let
-    direction = (V.subtract b a)
-    to_point = (V.subtract point a)
-    scalar = (projectionScalar direction to_point)
-    in (ifElse ((<) scalar 0) a (ifElse ((>) scalar 1) b (V.add a (V.scale scalar direction))))
+fromEndpoints = \a b -> (a, b)
+fromPointDirection = \p direction -> (p, V.add p direction)
+line = \segment -> (Line.fromPoints (endpoint0 segment) (endpoint1 segment))
+
+direction = ((.) Line.direction line)
+scalarPoint = \s t -> (Line.scalarPoint (line s) t)
+
+closestPoint = \segment point -> let
+    scalar = (Line.projectionScalar (line segment) point)
+    projection = (scalarPoint segment scalar)
+    in (ifElse ((<) scalar 0) (endpoint0 segment) (ifElse ((>) scalar 1) (endpoint1 segment) projection))
 
 toClosestPoint = \edge point -> (V.subtract (closestPoint edge point) point)
 

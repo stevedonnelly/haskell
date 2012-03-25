@@ -14,7 +14,7 @@ point1 = snd
 setPoint0 = setFst
 setPoint1 = setSnd
 
-fromEndpoints = \a b -> (a, b)
+fromPoints = \a b -> (a, b)
 fromPointDirection = \p direction -> (p, V.add p direction)
 
 direction = \line -> (V.subtract (point1 line) (point0 line))
@@ -25,8 +25,7 @@ projectionScalar = \line point -> let
     in (V.projectionScalar (direction line) (V.subtract point (point0 line)))
 
 closestPoint = \line point -> let
-    scalar = (Geometry.Line.projectionScalar line point)
-    in (V.add (point0 line) (V.scale scalar (direction line)))
+    in (scalarPoint line (Geometry.Line.projectionScalar line point))
 
 toClosestPoint = \line point -> (V.subtract (closestPoint line point) point)
 
