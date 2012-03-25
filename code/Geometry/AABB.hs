@@ -3,6 +3,7 @@ module Geometry.AABB where
 import Algebra.Vector as V
 import Control.Exception.Base
 import Data.List as List
+import Data.List.Extensions as ListExt
 import Data.Ratio as Ratio
 import Data.Tuple.Extensions as TupleExt
 

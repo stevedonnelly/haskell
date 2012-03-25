@@ -15,6 +15,8 @@ import Prelude.Extensions as PreludeExt
 
 
 type Polygon = [V.Vector]
+fromPoints = id
+points = id
 
 translate = \polygon translation -> (List.map (V.add translation) polygon)
 rotate = \polygon angle -> (List.map (M.transform (M2d.rotation angle)) polygon)
@@ -23,6 +25,12 @@ transform = \polygon center angle translation -> let
     rotated = (Geometry.Polygon.rotate centered angle)
     translated = (translate rotated (V.add center translation))
     in translated
+
+pointInside = \polygon point -> let
+    aabb = (AABB.pointsBoundingBox (points polygon))
+    though_point = (LS.fromEndpoints point (AABB.maxCorner aabb))
+    intersections = (List.map (LS.intersection through_point) (faces polygon))
+    in (odd (List.length (List.filter (\x -> ((==) (List.length x) 1)) intersections)))
 
 minimumYPoint = \points -> let
     preconditions = (notNull points)
