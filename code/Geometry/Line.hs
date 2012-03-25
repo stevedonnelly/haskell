@@ -27,11 +27,15 @@ projectionScalar = \line point -> let
 closestPoint = \line point -> let
     in (scalarPoint line (Geometry.Line.projectionScalar line point))
 
-toClosestPoint = \line point -> (V.subtract (closestPoint line point) point)
+toClosestPointWith = \closestPoint line point -> (V.subtract (closestPoint line point) point)
 
-distanceSquaredToPoint = \edge point-> (V.lengthSquared (toClosestPoint edge point))
+distanceSquaredToPointWith = \toClosestPoint edge point-> (V.lengthSquared (toClosestPoint edge point))
 
-distanceToPoint = \edge point -> (V.length (toClosestPoint edge point))
+distanceToPointWith = \toClosestPoint edge point -> (V.length (toClosestPoint edge point))
+
+toClosestPoint = (toClosestPointWith closestPoint)
+distanceSquaredToPoint = (distanceSquaredToPointWith toClosestPoint)
+distanceToPoint = (distanceToPointWith toClosestPoint)
 
 intersectionScalars = \line0 line1 -> let
     columns = [direction line0, V.negate (direction line1)]

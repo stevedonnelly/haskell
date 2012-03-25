@@ -24,10 +24,8 @@ closestPoint = \segment point -> let
     projection = (scalarPoint segment scalar)
     in (ifElse ((<) scalar 0) (endpoint0 segment) (ifElse ((>) scalar 1) (endpoint1 segment) projection))
 
-toClosestPoint = \edge point -> (V.subtract (closestPoint edge point) point)
-
-distanceSquaredToPoint = \edge point-> (V.lengthSquared (toClosestPoint edge point))
-
-distanceToPoint = \edge point -> (V.length (toClosestPoint edge point))
+toClosestPoint = (Line.toClosestPointWith closestPoint)
+distanceSquaredToPoint = (Line.distanceSquaredToPointWith toClosestPoint)
+distanceToPoint = (Line.distanceToPointWith toClosestPoint)
 
 
