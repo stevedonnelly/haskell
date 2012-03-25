@@ -1,7 +1,9 @@
 
 module Geometry.Line where
 import Algebra.Vector as V
+import Algebra.VectorSpaces as VS
 import Algebra.Matrix as M
+import Data.List as List
 import Data.Tuple.Extensions as TupleExt
 import Prelude.Extensions as PreludeExt
 
@@ -12,7 +14,12 @@ point1 = snd
 setPoint0 = setFst
 setPoint1 = setSnd
 
+fromEndpoints = \a b -> (a, b)
+fromPointDirection = \p direction -> (p, V.add p direction)
+
 direction = \line -> (V.subtract (point1 line) (point0 line))
+
+scalarPoint = \line scalar -> (V.add (point0 line) (V.scale scalar (direction line)))
 
 projectionScalar = \line point -> let
     in (V.projectionScalar (direction line) (V.subtract point (point0 line)))
@@ -28,10 +35,15 @@ distanceSquaredToPoint = \edge point-> (V.lengthSquared (toClosestPoint edge poi
 distanceToPoint = \edge point -> (V.length (toClosestPoint edge point))
 
 intersectionScalars = \line0 line1 -> let
-    directions0 = (V.toList (direction line0))
-    directions1 = (V.toList (V.negate (directions line1)))
-    columns = (List.map V.fromList [directions0, directions1])
-    matrix = (M.transpose (M.fromList columns))
+    columns = [direction line0, V.negate (direction line1)]
+    matrix = (M.fromColumnList columns)
     output = (V.subtract (point0 line1) (point0 line0))
-    in (M.solve matrix output)
+    in (VS.linearSystemSolution matrix output)
+
+intersection = \line0 line1 -> let
+    scalars = (intersectionScalars line0 line1)
+    intersection = (scalarPoint line0 (V.element (head scalars) 0))
+    length = (List.length scalars)
+    in (ifElse ((==) length 0) [] (ifElse ((==) length 1) [intersection] [point0 line0, point1 line0]))
+    
 

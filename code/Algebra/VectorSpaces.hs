@@ -46,7 +46,7 @@ backSubstitution = \matrix output -> let
     is_consistent = (all ((==) 0) (List.drop (List.length pivot_rows) (Vector.toList output)))
     in (ifElse is_consistent non_zero_solutions [])
 
-solveLinearSystem = \matrix output -> let
+linearSystemSolution = \matrix output -> let
     (rows, columns) = (Matrix.size matrix)
     merged = (ListExt.map2 (++) (Matrix.toRowLists matrix) (List.map (\x -> [x]) (Vector.toList output)))
     reduction = (rowReduction (Matrix.fromRowLists merged))

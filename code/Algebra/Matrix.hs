@@ -13,6 +13,7 @@ type Matrix = [Vector]
 
 fromRowList = id
 toRowList = id
+fromColumnList = ((.) Algebra.Matrix.transpose fromRowList)
 toColumnList = ((.) toRowList Algebra.Matrix.transpose)
 fromRowArray = ((.) fromRowList Map.elems)
 toRowArray = ((.) ListExt.toArray0 toRowList)
