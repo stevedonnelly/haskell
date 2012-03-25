@@ -36,7 +36,7 @@ backSubstitution = \matrix output -> let
         maybe_pivot_index = (List.elemIndex index pivot_indices)
         is_pivot = (isJust maybe_pivot_index)
         pivot = (fromJust maybe_pivot_index)
-        pivot_row = ((:) (Vector.element output pivot) (Vector.fromList ((!!) without_pivots pivot)))
+        pivot_row = ((:) (Vector.element output pivot) ((!!) without_pivots pivot))
         free = (fromJust (List.elemIndex index free_indices))
         free_row = (ListExt.replace (List.replicate number_of_solutions 0) ((+) free 1) (-1))
         in (ifElse is_pivot pivot_row free_row)

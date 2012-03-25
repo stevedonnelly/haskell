@@ -1,6 +1,6 @@
 
 module Geometry.AABB where
-import Algebra.Vector as Vector
+import Algebra.Vector as V
 import Control.Exception.Base
 import Data.List as List
 import Data.Ratio as Ratio
@@ -13,19 +13,21 @@ maxCorner = snd
 setMinCorner = setFst 
 setMaxCorner = setSnd
 
-center = \aabb -> (Vector.scale ((%) 1 2) (Vector.add (minCorner aabb) (maxCorner aabb)))
+fromMinMax = \min max -> (min, max)
+
+center = \aabb -> (V.scale ((%) 1 2) (V.add (minCorner aabb) (maxCorner aabb)))
 
 isValidDimensions = \aabb -> let
-    same_size = ((==) (Vector.size (minCorner aabb)) (Vector.size (maxCorner aabb)))
+    same_size = ((==) (V.size (minCorner aabb)) (V.size (maxCorner aabb)))
     ordered = (and (List.map (uncurry (<)) (zip (minCorner aabb) (maxCorner aabb))))
     in ((&&) same_size ordered)
 
-overlaps :: AABB -> AABB -> Bool
-overlaps = \a b -> let
-    preconditions = ((&&) (isValidDimensions a) (isValidDimensions b))
-    noOverlap = \a b -> ((||) ((<) (snd a) (fst b)) ((<) (snd b) (fst a)))
-    no_overlaps = (Vector.map2 noOverlap ((uncurry zip) a) ((uncurry zip) b))
-    result = (not (and no_overlaps))
-    in (assert preconditions result)
-    
+expandBounds = \aabb point -> let
+    mins = (ListExt.map2 min (V.toList (minCorner aabb)) (V.toList point))
+    maxs = (ListExt.map2 max (V.toList (maxCorner aabb)) (V.toList point))
+    in (fromMinMax (V.fromList mins) (V.fromList maxs))
+
+pointsBoundingBox = \points -> let
+    in (List.foldl expandBounds (fromMinMax (head points) (head points)) (tail points))
+
 
