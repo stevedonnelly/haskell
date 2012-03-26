@@ -8,6 +8,7 @@ import Data.List.Extensions as ListExt
 import Data.Map as Map
 import Data.Maybe as Maybe
 import Data.Ratio as Ratio
+import Geometry.AABB as AABB
 import Geometry.LineSegment as LS
 import Geometry.Matrix2d as M2d
 import Geometry.Vector2d as V2d
@@ -17,6 +18,8 @@ import Prelude.Extensions as PreludeExt
 type Polygon = [V.Vector]
 fromPoints = id
 points = id
+
+faces = \polygon -> (ListExt.map2 LS.fromEndpoints (points polygon) (ListExt.rotateLeft (points polygon)))
 
 translate = \polygon translation -> (List.map (V.add translation) polygon)
 rotate = \polygon angle -> (List.map (M.transform (M2d.rotation angle)) polygon)
@@ -28,7 +31,7 @@ transform = \polygon center angle translation -> let
 
 pointInside = \polygon point -> let
     aabb = (AABB.pointsBoundingBox (points polygon))
-    though_point = (LS.fromEndpoints point (AABB.maxCorner aabb))
+    through_point = (LS.fromEndpoints point (AABB.maxCorner aabb))
     intersections = (List.map (LS.intersection through_point) (faces polygon))
     in (odd (List.length (List.filter (\x -> ((==) (List.length x) 1)) intersections)))
 
