@@ -15,6 +15,13 @@ inverse = \map -> let
 injectiveInverse :: Ord a => Ord b => (Map a b) -> (Map b a)
 injectiveInverse = \map -> (Map.map List.head (inverse map))
 
+deleteWithSelector :: Ord k => ((Map k a) -> (k, a)) -> (Map k a) -> (Map k a)
+deleteWithSelector = \selector map -> (Map.delete (fst (selector map)) map)
+
+deleteMin :: Ord k => (Map k a) -> (Map k a)
+deleteMin = (deleteWithSelector Map.findMin)
+deleteMax :: Ord k => (Map k a) -> (Map k a)
+deleteMax = (deleteWithSelector Map.findMax)
 
 splitLess :: Ord k => k -> (Map k a) -> (Map k a, Map k a)
 splitLess = \key map -> let
