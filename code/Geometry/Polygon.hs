@@ -35,16 +35,12 @@ pointInside = \polygon point -> let
     intersections = (List.map (LS.intersection through_point) (faces polygon))
     in (odd (List.length (List.filter (\x -> ((==) (List.length x) 1)) intersections)))
 
-intersectionGraph = \graph polygon0 polygon1 -> let
-    (faces0, faces1) = (faces polygon0, faces polygon1)
-    addFace = \graph face -> let
-        intersections = (concat (List.map (LS.intersection face) (faces1)))
-        scalars = (List.map (\x -> (LS.projectionScalar face x, x)) intersections)
-        inner_points = (List.map snd (List.filter (\(s,f) -> ((&&) ((/=) s 0) ((/=) s 1))) scalars))
-        edges = (List.zip ((:) (endpoint0 face) inner_points) ((++) inner_points [endpoint1 face]))
-        addEdge = \graph (a, b) -> (Map.insertWith (++) a [b] graph)
-        in (List.foldl addEdge graph edges)
-    in (List.foldl addFace graph faces0)
+intersectionSubdivision = \polygon0 intersection_lookup -> let
+    faceSubdivision = \(id, face) -> let
+        intersections = ((!) intersection_lookup id)
+        scalar_points = (Map.fromList (List.map (\x -> (LS.projectionScalar face x, x)) intersections))
+        in (Map.elems (Map.delete 1 (Map.insert 0 (endpoint0 face) scalar_points)))
+    in (concat (List.map faceSubdivision (zipIndices0 (faces polygon))))
 
 minimumYPoint = \points -> let
     preconditions = (notNull points)
