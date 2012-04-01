@@ -10,6 +10,7 @@ import Data.Map as Map
 import Data.Maybe as Maybe
 import Data.Ratio as Ratio
 import Data.Set as Set
+import Data.Set.Extensions as SetExt
 import Data.Tuple.Extensions as TupleExt
 import Geometry.AABB as AABB
 import Geometry.LineSegment as LS
@@ -71,7 +72,8 @@ intersectionGraph = \polygon0 polygon1 -> let
 intersection :: Polygon -> Polygon -> [Polygon]
 intersection = \polygon0 polygon1 -> let
     (graph, inside) = (intersectionGraph polygon0 polygon1)
-    inside_graph = (Map.filterWithKey (\point neighbors -> (Set.member point inside)) graph)
+    inside_neighbors = (Map.map (List.filter (flip Set.member inside)) graph)
+    inside_graph = (Map.intersection inside_neighbors (SetExt.toMap (const []) inside))
     in (Graph.connectedComponents inside_graph)
 
 minimumYPoint = \points -> let
