@@ -44,4 +44,7 @@ depthFirstSearchVisited = \graph id time_visited -> let
     exit_result = ((fst neighbors_result) + 1, exit_current)
     in (ifElse (Map.member id visited) time_visited exit_result)
         
+union :: Ord vertex => (Graph vertex) -> (Graph vertex) -> (Graph vertex)
+union = \graph0 graph1 -> (Map.unionWith (++) graph0 graph1)
+
 
