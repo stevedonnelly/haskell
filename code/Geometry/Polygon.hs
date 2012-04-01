@@ -71,7 +71,7 @@ intersectionGraph = \polygon0 polygon1 -> let
 intersection :: Polygon -> Polygon -> [Polygon]
 intersection = \polygon0 polygon1 -> let
     (graph, inside) = (intersectionGraph polygon0 polygon1)
-    inside_graph = (Map.filterWithKey (\(point,neighbors) -> (Set.notMember point inside)) graph)
+    inside_graph = (Map.filterWithKey (\point neighbors -> (Set.member point inside)) graph)
     in (Graph.connectedComponents inside_graph)
 
 minimumYPoint = \points -> let
