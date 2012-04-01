@@ -3,11 +3,14 @@ module Geometry.Polygon where
 import Algebra.Matrix as M
 import Algebra.Vector as V
 import Control.Exception.Base
+import Data.Graph.Extensions as Graph
 import Data.List as List
 import Data.List.Extensions as ListExt
 import Data.Map as Map
 import Data.Maybe as Maybe
 import Data.Ratio as Ratio
+import Data.Set as Set
+import Data.Tuple.Extensions as TupleExt
 import Geometry.AABB as AABB
 import Geometry.LineSegment as LS
 import Geometry.Matrix2d as M2d
@@ -20,6 +23,8 @@ fromPoints = id
 points = id
 
 faces = \polygon -> (ListExt.map2 LS.fromEndpoints (points polygon) (ListExt.rotateLeft (points polygon)))
+
+directedGraph = \polygon -> (Map.fromList (List.map (\f -> (endpoint0 f, [endpoint1 f])) (faces polygon)))
 
 translate = \polygon translation -> (List.map (V.add translation) polygon)
 rotate = \polygon angle -> (List.map (M.transform (M2d.rotation angle)) polygon)
@@ -35,12 +40,32 @@ pointInside = \polygon point -> let
     intersections = (List.map (LS.intersection through_point) (faces polygon))
     in (odd (List.length (List.filter (\x -> ((==) (List.length x) 1)) intersections)))
 
-intersectionSubdivision = \polygon0 intersection_lookup -> let
+intersectionSubdivision :: Polygon -> (Map Int [Vector]) -> Polygon
+intersectionSubdivision = \polygon intersection_lookup -> let
     faceSubdivision = \(id, face) -> let
         intersections = ((!) intersection_lookup id)
         scalar_points = (Map.fromList (List.map (\x -> (LS.projectionScalar face x, x)) intersections))
         in (Map.elems (Map.delete 1 (Map.insert 0 (endpoint0 face) scalar_points)))
-    in (concat (List.map faceSubdivision (zipIndices0 (faces polygon))))
+    in (fromPoints (concat (List.map faceSubdivision (zipIndices0 (faces polygon)))))
+
+insideIntersection = \polygon0 polygon1 intersection_boundaries -> let
+    walkBoundary = \(intersection, is_inside) point -> let
+        result_intersection = (ifElse is_inside (Set.insert point intersection) intersection)
+        result_is_inside = (ifElse (Set.member point intersection_boundaries) (not is_inside) is_inside)
+        in (result_intersection, result_is_inside)
+    points0 = (points polygon0)
+    result = (List.foldl walkBoundary (intersection_boundaries, pointInside polygon1 (head points0)) points0)
+    in (ifElse (List.null points0) intersection_boundaries (fst result))
+
+intersectionGraph :: Polygon -> Polygon -> (Graph Vector, Set Vector)
+intersectionGraph = \polygon0 polygon1 -> let
+    face_pairs = (ListExt.crossProduct (zipIndices0 (faces polygon0)) (zipIndices0 (faces polygon1)))
+    intersections = (List.map (\((id0, f0), (id1, f1)) -> (id0, id1, LS.intersection f0 f1)) face_pairs)
+    subdivision0 = (intersectionSubdivision polygon0 (Map.fromListWith (++) (List.map (\(a,b,c) -> (a,c)) intersections)))
+    subdivision1 = (intersectionSubdivision polygon1 (Map.fromListWith (++) (List.map (\(a,b,c) -> (b,c)) intersections)))
+    intersection_set = (Set.fromList (concat (List.map third3 intersections)))
+    inside_set = (Set.union (insideIntersection subdivision0 subdivision1 intersection_set) (insideIntersection subdivision1 subdivision0 intersection_set))
+    in (Graph.union (directedGraph subdivision0) (directedGraph subdivision1), inside_set)
 
 minimumYPoint = \points -> let
     preconditions = (notNull points)
