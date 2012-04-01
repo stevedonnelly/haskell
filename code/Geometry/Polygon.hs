@@ -38,7 +38,7 @@ pointInside = \polygon point -> let
     aabb = (AABB.pointsBoundingBox (points polygon))
     through_point = (LS.fromEndpoints point (AABB.maxCorner aabb))
     intersections = (List.map (LS.intersection through_point) (faces polygon))
-    in (odd (List.length (List.filter (\x -> ((==) (List.length x) 1)) intersections)))
+    in (odd (Set.size (Set.fromList (concat (intersections)))))
 
 intersectionSubdivision :: Polygon -> (Map Int [Vector]) -> Polygon
 intersectionSubdivision = \polygon intersection_lookup -> let
