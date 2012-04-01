@@ -8,7 +8,7 @@ import Prelude.Extensions as PreludeExt
 
 rowReduction = \matrix -> let
     compareRows = \index a b -> (compare (abs (Vector.element a index)) (abs (Vector.element b index)))
-    maximumRow = \rows index -> (List.maximumBy (compareRows index) rows)
+    maximumRow = \rows index -> (List.maximumBy (compareRows index) (List.reverse rows))
     (rows, columns) = (Matrix.size matrix)
     rowReduction = \matrix row column -> let
         at_end = ((||) ((==) row rows) ((==) column columns))
