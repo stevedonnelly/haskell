@@ -2,6 +2,7 @@
 module Geometry.LineSegment where
 import qualified Algebra.Vector as V
 import qualified Data.List as List
+import qualified Data.List.Extensions as ListExt
 import Data.Tuple.Extensions as TupleExt
 import qualified Geometry.Line as Line
 import Prelude.Extensions as PreludeExt
@@ -40,8 +41,8 @@ intersection = \segment0 segment1 -> let
         (projectionScalar segment0 (endpoint1 segment1), endpoint1 segment1),
         (projectionScalar segment1 (endpoint0 segment0), endpoint0 segment0),
         (projectionScalar segment1 (endpoint1 segment0), endpoint1 segment0)]
-    inner_endpoints = (List.init (List.tail (List.sort endpoints)))
-    is_valid_inner = (and (List.map ((.) in0_1 fst) inner_endpoints))
+    inner_endpoints = (List.filter (\(scalar, point) -> (in0_1 scalar)) endpoints)
+    is_valid_inner = (ListExt.notNull inner_endpoints)
     segment_intersection = (List.nub (List.map snd inner_endpoints))
     length_1_case = (ifElse is_valid [intersection] [])
     length_2_case = (ifElse is_valid_inner segment_intersection [])
