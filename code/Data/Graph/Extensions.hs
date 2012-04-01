@@ -2,6 +2,7 @@
 module Data.Graph.Extensions where
 import Data.List as List
 import Data.Map as Map
+import Data.Map.Extensions as MapExt
 import Data.Set as Set
 import Data.Tuple as Tuple
 import Prelude.Extensions as PreludeExt
@@ -44,6 +45,15 @@ depthFirstSearchVisited = \graph id time_visited -> let
     exit_result = ((fst neighbors_result) + 1, exit_current)
     in (ifElse (Map.member id visited) time_visited exit_result)
         
+connectedComponents :: Ord vertex => (Graph vertex) -> [[vertex]]
+connectedComponents = \graph -> let
+    connectedComponents = \time_vertices -> let
+        ((start, stop), v) = (Map.findMin time_vertices)
+        (less, greater) = (MapExt.splitLess (stop, stop) time_vertices)
+        result = ((:) (Map.elems less) (connectedComponents greater))
+        in (ifElse (Map.null time_vertices) [] result)
+    in (connectedComponents (MapExt.injectiveInverse (depthFirstSearchAll graph)))
+
 union :: Ord vertex => (Graph vertex) -> (Graph vertex) -> (Graph vertex)
 union = \graph0 graph1 -> (Map.unionWith (++) graph0 graph1)
 
