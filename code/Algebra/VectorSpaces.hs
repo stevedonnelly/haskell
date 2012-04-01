@@ -7,7 +7,7 @@ import Data.Maybe as Maybe
 import Prelude.Extensions as PreludeExt
 
 rowReduction = \matrix -> let
-    compareRows = \index a b -> (compare (Vector.element a index) (Vector.element b index))
+    compareRows = \index a b -> (compare (abs (Vector.element a index)) (abs (Vector.element b index)))
     maximumRow = \rows index -> (List.maximumBy (compareRows index) rows)
     (rows, columns) = (Matrix.size matrix)
     rowReduction = \matrix row column -> let
