@@ -54,7 +54,8 @@ insideIntersection = \polygon0 polygon1 intersection_boundaries -> let
         result_is_inside = (ifElse (Set.member point intersection_boundaries) (not is_inside) is_inside)
         in (result_intersection, result_is_inside)
     points0 = (points polygon0)
-    result = (List.foldl walkBoundary (intersection_boundaries, pointInside polygon1 (head points0)) points0)
+    starting_point = (LS.scalarPoint (LS.fromEndpoints (last points0) (head points0)) ((%) 1 2))
+    result = (List.foldl walkBoundary (intersection_boundaries, pointInside polygon1 starting_point) points0)
     in (ifElse (List.null points0) intersection_boundaries (fst result))
 
 intersectionGraph :: Polygon -> Polygon -> (Graph Vector, Set Vector)
@@ -66,6 +67,12 @@ intersectionGraph = \polygon0 polygon1 -> let
     intersection_set = (Set.fromList (concat (List.map third3 intersections)))
     inside_set = (Set.union (insideIntersection subdivision0 subdivision1 intersection_set) (insideIntersection subdivision1 subdivision0 intersection_set))
     in (Graph.union (directedGraph subdivision0) (directedGraph subdivision1), inside_set)
+
+intersection :: Polygon -> Polygon -> [Polygon]
+intersection = \polygon0 polygon1 -> let
+    (graph, inside) = (intersectionGraph polygon0 polygon1)
+    inside_graph = (Map.filterWithKey (\(point,neighbors) -> (Set.notMember point inside)) graph)
+    in (Graph.connectedComponents inside_graph)
 
 minimumYPoint = \points -> let
     preconditions = (notNull points)
