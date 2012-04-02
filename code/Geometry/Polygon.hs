@@ -36,10 +36,14 @@ transform = \polygon center angle translation -> let
     in translated
 
 pointInside = \polygon point -> let
-    aabb = (AABB.pointsBoundingBox (points polygon))
-    through_point = (LS.fromEndpoints point (AABB.maxCorner aabb))
-    intersections = (List.map (LS.intersection through_point) (faces polygon))
-    in (odd (Set.size (Set.fromList (concat (intersections)))))
+    walkBoundary = \(winding_number, on_vertex) face -> let
+        toQuadrant = ((.) V2d.quadrant (flip V.subtract point))
+        [start, stop] = (List.map toQuadrant [endpoint0 face, endpoint1 face])
+        result_winding_number = ((+) winding_number ((-) stop start))
+        result_on_vertex = ((||) on_vertex (or (List.map ((==) (-1)) [start,stop])))
+        in (result_winding_number, result_on_vertex)
+    (winding_number, on_vertex) = (List.foldl walkBoundary (0, False) (faces polygon))
+    in ((||) ((==) winding_number 4) on_vertex)
 
 intersectionSubdivision :: Polygon -> (Map Int [Vector]) -> Polygon
 intersectionSubdivision = \polygon intersection_lookup -> let
