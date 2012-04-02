@@ -3,6 +3,7 @@ module Geometry.LineSegment where
 import qualified Algebra.Vector as V
 import qualified Data.List as List
 import qualified Data.List.Extensions as ListExt
+import Data.Ratio as Ratio
 import Data.Tuple.Extensions as TupleExt
 import qualified Geometry.Line as Line
 import Prelude.Extensions as PreludeExt
@@ -21,6 +22,7 @@ line = \segment -> (Line.fromPoints (endpoint0 segment) (endpoint1 segment))
 direction = ((.) Line.direction line)
 scalarPoint = \s t -> (Line.scalarPoint (line s) t)
 projectionScalar = \s p -> (Line.projectionScalar (line s) p)
+midpoint = (flip scalarPoint ((%) 1 2))
 
 closestPoint = \segment point -> let
     scalar = (projectionScalar segment point)
