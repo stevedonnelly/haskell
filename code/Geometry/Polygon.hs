@@ -35,15 +35,19 @@ transform = \polygon center angle translation -> let
     translated = (translate rotated (V.add center translation))
     in translated
 
-pointInside = \polygon point -> let
-    walkBoundary = \(winding_number, on_vertex) face -> let
+pointIntersection = \polygon point -> let
+    walkBoundary = \(winding_number, on_boundary) face -> let
         toQuadrant = ((.) V2d.quadrant (flip V.subtract point))
         [start, stop] = (List.map toQuadrant [endpoint0 face, endpoint1 face])
-        result_winding_number = ((+) winding_number ((-) stop start))
-        result_on_vertex = ((||) on_vertex (or (List.map ((==) (-1)) [start,stop])))
-        in (result_winding_number, result_on_vertex)
-    (winding_number, on_vertex) = (List.foldl walkBoundary (0, False) (faces polygon))
-    in ((||) ((==) winding_number 4) on_vertex)
+        quadrant = ((-) stop start)
+        distance = (LS.distanceSquaredToPoint face point)
+        turn = (V2d.crossProduct (LS.direction face) (V.subtract point (LS.endpoint0 face)))
+        turn_cases = [((>) turn 0, ((ifElse ((<) quadrant 0) ((+) quadrant 4) quadrant), False)),
+            ((<) turn 0, ((ifElse ((>) quadrant 0) ((-) quadrant 4) quadrant), False))]
+        (winding_change, boundary_change) = (cases turn_cases (0, (==) distance 0))
+        in ((+) winding_number winding_change, (||) on_boundary boundary_change)
+    (winding_number, on_boundary) = (List.foldl walkBoundary (0, False) (faces polygon))
+    in ((||) ((==) winding_number 4) on_boundary)
 
 intersectionSubdivision :: Polygon -> (Map Int [Vector]) -> Polygon
 intersectionSubdivision = \polygon intersection_lookup -> let
