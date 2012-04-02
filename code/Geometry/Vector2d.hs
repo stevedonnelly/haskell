@@ -9,13 +9,14 @@ crossProduct = \a b -> let
     e = Vector.element
     in ((-) ((*) (e a 0) (e b 1)) ((*) (e a 1) (e b 0)))
 
+quadrant :: Vector -> Int
 quadrant = \vector -> let
     (x, y) = (Vector.element vector 0, Vector.element vector 1)
     case_list = [((&&) ((>) x 0) ((>=) y 0), 0),
         ((&&) ((>=) 0 x) ((>) y 0), 1),
-        ((&&) ((>) 0 x) ((>=) 0 y), 2)]
-        --((&&) ((>=) x 0) ((>) 0 y), 3)]
-    in (cases case_list 3)
+        ((&&) ((>) 0 x) ((>=) 0 y), 2),
+        ((&&) ((>=) x 0) ((>) 0 y), 3)]
+    in (cases case_list (-1))
 
 fromAngle = \angle -> let
     a = (fromRational angle)
