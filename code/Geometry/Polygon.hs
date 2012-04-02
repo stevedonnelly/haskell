@@ -78,14 +78,32 @@ filterIntersectionGraph = \graph inside_set polygon0 polygon1 -> let
         in ((&&) (pointIntersection polygon0) (pointIntersection polygon1))
     in (Graph.fromEdges (List.filter insideGraph (Graph.edges inside_vertices)))
 
+extractPolygonCycles :: (Graph Vector) -> [Polygon]
+extractPolygonCycles = \graph -> let
+    extractCycle = \graph start path -> let
+        neighbors = ((!) graph (head path))
+        remaining = (Map.insert (head path) (SetExt.deleteMin neighbors) graph)
+        recurse = (extractCycle remaining start ((:) (Set.findMin neighbors) path))
+        is_complete = ((&&) ((==) (head path) start) (ListExt.notNull (tail path)))
+        points = (List.reverse (tail path))
+        removeDisjoint = (Map.update (\x -> (ifElse (Set.null x) Nothing (Just x))))
+        result_graph = (List.foldl (flip removeDisjoint) graph points)
+        in (ifElse is_complete (fromPoints points, result_graph) recurse)
+    extractPolygonCycles = \graph -> let
+        start = (fst (Map.findMin graph))
+        (polygon, remaining) = (extractCycle graph start [start])
+        result = ((:) polygon (extractPolygonCycles remaining))
+        in (ifElse (Map.null graph) [] result)
+    in (extractPolygonCycles (Map.filter SetExt.notNull (Map.map Set.fromList graph)))
+
 intersection :: Polygon -> Polygon -> [Polygon]
 intersection = \polygon0 polygon1 -> let
     (graph, inside_set) = (intersectionGraph polygon0 polygon1)
     inside_graph = (filterIntersectionGraph graph inside_set polygon0 polygon1)
-    in (Graph.connectedComponents inside_graph)
+    in (extractPolygonCycles inside_graph)
 
 minimumYPoint = \points -> let
-    preconditions = (notNull points)
+    preconditions = (ListExt.notNull points)
     x = ((flip V.element) 0)
     y = ((flip V.element) 1)
     yLess = \a b -> ((<) (y a) (y b)) 
