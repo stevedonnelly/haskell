@@ -7,6 +7,7 @@ import Data.Map as Map
 import Data.Set as Set
 import Prelude.Extensions as PreludeExt
 
+notNull = ((.) not Set.null)
 
 deleteMin :: Ord a => Set a -> Set a
 deleteMin = \set -> (Set.delete (Set.findMin set) set)
