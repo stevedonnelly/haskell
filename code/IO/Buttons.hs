@@ -3,7 +3,7 @@ module IO.Buttons where
 import Data.List as List
 import Data.Map as Map
 import Data.Set as Set
-import Extensions.Prelude as PreludeExt
+import Prelude.Extensions as PreludeExt
 
 
 processButtonEvent :: Ord k => (k -> Set k -> Set k) -> k -> (Set k) -> (Map k Int) -> (Set k, Map k Int)

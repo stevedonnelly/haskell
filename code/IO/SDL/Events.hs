@@ -5,8 +5,8 @@ import Data.Map as Map
 import Data.Set as Set
 import Graphics.UI.SDL.Events as SE
 import Graphics.UI.SDL.Keysym as Keysym
-import Extensions.Prelude as PreludeExt
 import IO.Buttons as Buttons
+import Prelude.Extensions as PreludeExt
 
 
 isNoEvent = \event -> case event of
