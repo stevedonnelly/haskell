@@ -8,6 +8,11 @@ import Data.Set as Set
 import Prelude.Extensions as PreludeExt
 
 
+deleteMin :: Ord a => Set a -> Set a
+deleteMin = \set -> (Set.delete (Set.findMin set) set)
+deleteMax :: Ord a => Set a -> Set a
+deleteMax = \set -> (Set.delete (Set.findMax set) set)
+
 intersections :: Ord a => [Set a] -> (Set a)
 intersections = \sets -> let
     preconditions = (ListExt.notNull sets)
