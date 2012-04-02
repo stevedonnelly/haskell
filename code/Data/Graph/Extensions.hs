@@ -14,6 +14,8 @@ type (SimpleGraph vertex) = (Map vertex (Set vertex))
 
 empty = Map.empty
 
+fromEdges :: Ord vertex => [(vertex, vertex)] -> (Graph vertex)
+fromEdges = \vertex_neighbors -> (Map.fromListWith (++) (List.map (\(a,b) -> (a,[b])) vertex_neighbors))
 edges = \graph -> let
     edge_pairs = (Map.mapWithKey (\key edges -> (List.map (\edge -> (key, edge)) edges)) graph)
     in (concat (Map.elems edge_pairs))
