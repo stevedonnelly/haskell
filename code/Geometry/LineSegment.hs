@@ -31,6 +31,8 @@ toClosestPoint = (Line.toClosestPointWith closestPoint)
 distanceSquaredToPoint = (Line.distanceSquaredToPointWith toClosestPoint)
 distanceToPoint = (Line.distanceToPointWith toClosestPoint)
 
+pointIntersection = \segment point -> ((==) (distanceSquaredToPoint segment point) 0)
+
 intersection = \segment0 segment1 -> let
     scalars = (Line.intersectionScalars (line segment0) (line segment1))
     length = (List.length scalars)
