@@ -69,11 +69,19 @@ intersectionGraph = \polygon0 polygon1 -> let
     inside_set = (Set.fromList (concat [inside0, inside1, concat (List.map third3 intersections)]))
     in (Graph.union (directedGraph subdivision0) (directedGraph subdivision1), inside_set)
 
+filterIntersectionGraph = \graph inside_set polygon0 polygon1 -> let
+    inside_neighbors = (Map.map (List.filter (flip Set.member inside_set)) graph)
+    inside_vertices = (Map.intersection inside_neighbors (SetExt.toMap (const []) inside_set))
+    insideGraph = \(a,b) -> let
+        midpoint = (LS.midpoint (LS.fromEndpoints a b))
+        pointIntersection = (flip Geometry.Polygon.pointIntersection midpoint)
+        in ((&&) (pointIntersection polygon0) (pointIntersection polygon1))
+    in (Graph.fromEdges (List.filter insideGraph (Graph.edges inside_vertices)))
+
 intersection :: Polygon -> Polygon -> [Polygon]
 intersection = \polygon0 polygon1 -> let
-    (graph, inside) = (intersectionGraph polygon0 polygon1)
-    inside_neighbors = (Map.map (List.filter (flip Set.member inside)) graph)
-    inside_graph = (Map.intersection inside_neighbors (SetExt.toMap (const []) inside))
+    (graph, inside_set) = (intersectionGraph polygon0 polygon1)
+    inside_graph = (filterIntersectionGraph graph inside_set polygon0 polygon1)
     in (Graph.connectedComponents inside_graph)
 
 minimumYPoint = \points -> let
