@@ -40,11 +40,10 @@ pointIntersection = \polygon point -> let
         toQuadrant = ((.) V2d.quadrant (flip V.subtract point))
         [start, stop] = (List.map toQuadrant [endpoint0 face, endpoint1 face])
         quadrant = ((-) stop start)
-        distance = (LS.distanceSquaredToPoint face point)
         turn = (V2d.crossProduct (LS.direction face) (V.subtract point (LS.endpoint0 face)))
         turn_cases = [((>) turn 0, ((ifElse ((<) quadrant 0) ((+) quadrant 4) quadrant), False)),
             ((<) turn 0, ((ifElse ((>) quadrant 0) ((-) quadrant 4) quadrant), False))]
-        (winding_change, boundary_change) = (cases turn_cases (0, (==) distance 0))
+        (winding_change, boundary_change) = (cases turn_cases (0, LS.pointIntersection face point))
         in ((+) winding_number winding_change, (||) on_boundary boundary_change)
     (winding_number, on_boundary) = (List.foldl walkBoundary (0, False) (faces polygon))
     in ((||) ((==) winding_number 4) on_boundary)
@@ -57,24 +56,17 @@ intersectionSubdivision = \polygon intersection_lookup -> let
         in (Map.elems (Map.delete 1 (Map.insert 0 (endpoint0 face) scalar_points)))
     in (fromPoints (concat (List.map faceSubdivision (zipIndices0 (faces polygon)))))
 
-insideIntersection = \polygon0 polygon1 intersection_boundaries -> let
-    walkBoundary = \(intersection, is_inside) point -> let
-        result_intersection = (ifElse is_inside (Set.insert point intersection) intersection)
-        result_is_inside = (ifElse (Set.member point intersection_boundaries) (not is_inside) is_inside)
-        in (result_intersection, result_is_inside)
-    points0 = (points polygon0)
-    starting_point = (LS.scalarPoint (LS.fromEndpoints (last points0) (head points0)) ((%) 1 2))
-    result = (List.foldl walkBoundary (intersection_boundaries, pointInside polygon1 starting_point) points0)
-    in (ifElse (List.null points0) intersection_boundaries (fst result))
-
 intersectionGraph :: Polygon -> Polygon -> (Graph Vector, Set Vector)
 intersectionGraph = \polygon0 polygon1 -> let
     face_pairs = (ListExt.crossProduct (zipIndices0 (faces polygon0)) (zipIndices0 (faces polygon1)))
     intersections = (List.map (\((id0, f0), (id1, f1)) -> (id0, id1, LS.intersection f0 f1)) face_pairs)
-    subdivision0 = (intersectionSubdivision polygon0 (Map.fromListWith (++) (List.map (\(a,b,c) -> (a,c)) intersections)))
-    subdivision1 = (intersectionSubdivision polygon1 (Map.fromListWith (++) (List.map (\(a,b,c) -> (b,c)) intersections)))
+    (take02, take12) = (\(a,b,c) -> (a,c), \(a,b,c) -> (b,c))
+    subdivision0 = (intersectionSubdivision polygon0 (Map.fromListWith (++) (List.map take02 intersections)))
+    subdivision1 = (intersectionSubdivision polygon1 (Map.fromListWith (++) (List.map take12 intersections)))
     intersection_set = (Set.fromList (concat (List.map third3 intersections)))
-    inside_set = (Set.union (insideIntersection subdivision0 subdivision1 intersection_set) (insideIntersection subdivision1 subdivision0 intersection_set))
+    inside0 = (List.filter (Geometry.Polygon.pointIntersection polygon1) (points polygon0))
+    inside1 = (List.filter (Geometry.Polygon.pointIntersection polygon0) (points polygon1))
+    inside_set = (Set.fromList (concat [inside0, inside1, concat (List.map third3 intersections)]))
     in (Graph.union (directedGraph subdivision0) (directedGraph subdivision1), inside_set)
 
 intersection :: Polygon -> Polygon -> [Polygon]
