@@ -15,6 +15,7 @@ splitBlocks = \size list -> let
     result = (fst (List.foldr splitBlock ([[]], 0) list))
     in (ifElse (List.null list) [] result)
 
+pixelRowLists :: Surface -> IO [[[Word8]]]
 pixelRowLists = \surface -> do
     let (width, height) = (surfaceGetWidth surface, surfaceGetHeight surface)
     let format = (surfaceGetPixelFormat surface)
