@@ -4,6 +4,7 @@ import qualified Algebra.Vector as V
 import qualified Data.List as List
 import qualified Data.List.Extensions as ListExt
 import Data.Ratio as Ratio
+import Data.Tuple as Tuple
 import Data.Tuple.Extensions as TupleExt
 import qualified Geometry.Line as Line
 import Prelude.Extensions as PreludeExt
