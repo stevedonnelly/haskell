@@ -30,9 +30,7 @@ toAngle = \v -> let
     in (toRational (atan2 y x))
 
 angle = \v0 v1 -> let
-    normalize = \angle -> (ifElse ((<) angle 0) ((+) ((*) 2 (toRational pi)) angle) angle)
-    (angle0, angle1) = (normalize (toAngle v0), normalize (toAngle v1))
-    in ((-) angle1 angle0)
+    in (normalizeAngle0 ((-) (toAngle v1) (toAngle v0)))
 
 rotate = \v angle -> (fromAngle ((+) (toAngle v) angle))
 
