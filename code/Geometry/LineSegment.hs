@@ -52,4 +52,18 @@ intersection = \segment0 segment1 -> let
     length_2_case = (ifElse is_valid_inner segment_intersection [])
     in (ifElse ((==) length 0) [] (ifElse ((==) length 1) length_1_case length_2_case))
 
+approximatePolychain = \tolerance points -> let
+    tolerance_squared = ((*) tolerance tolerance)
+    approximatePolychain = \points -> let
+        distanceTo = (distanceSquaredToPoint (fromEndpoints (head points) (last points)))
+        distances = (List.map swap (ListExt.zipIndices0 (List.map distanceTo points)))
+        (max_distance, max_index) = (List.maximum distances)
+        (left, right) = (List.splitAt max_index points)
+        recurse_left = (approximatePolychain ((++) left [head right]))
+        recurse_right = (approximatePolychain right)
+        result = ((++) recurse_left (tail recurse_right))
+        in (ifElse ((>) max_distance tolerance_squared) result [head points, last points])
+    result = (approximatePolychain points)
+    in (ifElse ((<) (List.length points) 3) points result)
+
 
