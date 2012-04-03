@@ -78,23 +78,30 @@ filterIntersectionGraph = \graph inside_set polygon0 polygon1 -> let
         in ((&&) (pointIntersection polygon0) (pointIntersection polygon1))
     in (Graph.fromEdges (List.filter insideGraph (Graph.edges inside_vertices)))
 
+extractPolygonCycle :: (Graph Vector) -> [Vector] -> [Vector] -> (Bool, [Vector])
+extractPolygonCycle = \graph start path -> let
+    (current, previous, neighbors) = (head path, head (tail path), (!) graph current)
+    outwardsAngle = \x -> (V2d.angle (V.subtract previous current) (V.subtract x current))
+    (angle, next) = (List.minimum (List.map (\x -> (outwardsAngle x, x)) neighbors))
+    recurse = (extractPolygonCycle graph start ((:) next path))
+    (prefix, suffix) = (List.splitAt 2 path)
+    is_complete = ((&&) ((==) prefix start) (ListExt.notNull suffix))
+    in (ifElse is_complete (True,List.reverse suffix) (ifElse (List.null neighbors) (False,path) recurse))
+
 extractPolygonCycles :: (Graph Vector) -> [Polygon]
 extractPolygonCycles = \graph -> let
-    extractCycle = \graph start path -> let
-        neighbors = ((!) graph (head path))
-        remaining = (Map.insert (head path) (SetExt.deleteMin neighbors) graph)
-        recurse = (extractCycle remaining start ((:) (Set.findMin neighbors) path))
-        is_complete = ((&&) ((==) (head path) start) (ListExt.notNull (tail path)))
-        points = (List.reverse (tail path))
-        removeDisjoint = (Map.update (\x -> (ifElse (Set.null x) Nothing (Just x))))
-        result_graph = (List.foldl (flip removeDisjoint) graph points)
-        in (ifElse is_complete (fromPoints points, result_graph) recurse)
     extractPolygonCycles = \graph -> let
-        start = (fst (Map.findMin graph))
-        (polygon, remaining) = (extractCycle graph start [start])
-        result = ((:) polygon (extractPolygonCycles remaining))
+        (start, neighbors) = (Map.findMax graph)
+        outwardsAngle = \x -> (V2d.angle (V.fromList [1, 0]) (V.subtract x start))
+        (angle, next) = (List.minimum (List.map (\x -> (outwardsAngle x, x)) neighbors))
+        extracted_result = (extractPolygonCycle graph [next, start] [next, start])
+        (is_cycle, path) = (ifElse (List.null neighbors) (True,[start]) extracted_result)
+        notUsed = (flip Set.notMember (Set.fromList path))
+        remaining_graph = (Map.filterWithKey (\k a -> notUsed k) (Map.map (List.filter notUsed) graph))
+        recurse = (extractPolygonCycles remaining_graph)
+        result = (ifElse is_cycle ((:) (fromPoints path) recurse) recurse)
         in (ifElse (Map.null graph) [] result)
-    in (extractPolygonCycles (Map.filter SetExt.notNull (Map.map Set.fromList graph)))
+    in (extractPolygonCycles graph)
 
 intersection :: Polygon -> Polygon -> [Polygon]
 intersection = \polygon0 polygon1 -> let
