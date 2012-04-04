@@ -7,6 +7,8 @@ import Data.Map as Map
 import Data.Tuple.Extensions as TupleExt
 import Data.Word as Word
 
+initializeLibrary = Devil.ilInit
+
 imageArrayToMap :: (UArray (Int, Int, Int) Word8) -> (Map Vector Vector)
 imageArrayToMap = \array -> let
     height = ((-) (List.maximum (List.map snd3 (UArray.indices array))) 1)
