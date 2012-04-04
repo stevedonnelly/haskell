@@ -81,7 +81,7 @@ filterIntersectionGraph = \graph inside_set polygon0 polygon1 -> let
 extractPolygonCycle :: (Graph Vector) -> [Vector] -> [Vector] -> (Bool, [Vector])
 extractPolygonCycle = \graph start path -> let
     (current, previous, neighbors) = (head path, head (tail path), (!) graph current)
-    outwardsAngle = \x -> (V2d.angle (V.subtract previous current) (V.subtract x current))
+    outwardsAngle = \x -> (V2d.positiveAngle (V.subtract previous current) (V.subtract x current))
     (angle, next) = (List.minimum (List.map (\x -> (outwardsAngle x, x)) neighbors))
     recurse = (extractPolygonCycle graph start ((:) next path))
     (prefix, suffix) = (List.splitAt 2 path)
@@ -92,7 +92,7 @@ extractPolygonCycles :: (Graph Vector) -> [Polygon]
 extractPolygonCycles = \graph -> let
     extractPolygonCycles = \graph -> let
         (start, neighbors) = (Map.findMax graph)
-        outwardsAngle = \x -> (V2d.angle (V.fromList [1, 0]) (V.subtract x start))
+        outwardsAngle = \x -> (V2d.positiveAngle (V.fromList [1, 0]) (V.subtract x start))
         (angle, next) = (List.minimum (List.map (\x -> (outwardsAngle x, x)) neighbors))
         extracted_result = (extractPolygonCycle graph [next, start] [next, start])
         (is_cycle, path) = (ifElse (List.null neighbors) (True,[start]) extracted_result)

@@ -32,6 +32,10 @@ toAngle = \v -> let
 angle = \v0 v1 -> let
     in (normalizeAngle0 ((-) (toAngle v1) (toAngle v0)))
 
+positiveAngle = \v0 v1 -> let
+    angle = (Geometry.Vector2d.angle v0 v1)
+    in (ifElse ((==) angle 0) ((*) (toRational pi) 2) angle)
+
 rotate = \v angle -> (fromAngle ((+) (toAngle v) angle))
 
 perpendicular :: Vector -> Vector
