@@ -11,9 +11,8 @@ initializeLibrary = Devil.ilInit
 
 imageArrayToMap :: (UArray (Int, Int, Int) Word8) -> (Map Vector Vector)
 imageArrayToMap = \array -> let
-    height = ((-) (List.maximum (List.map snd3 (UArray.indices array))) 1)
     toMapElement = \((row, column, channel), color) -> let
-        in (Vector.fromList (List.map toRational [column, (-) height row]), Map.singleton channel color)
+        in (Vector.fromList (List.map toRational [column, row]), Map.singleton channel color)
     channel_maps = (Map.fromListWith Map.union (List.map toMapElement (UArray.assocs array)))
     in (Map.map (\x -> (Vector.fromList (List.map toRational (Map.elems x)))) channel_maps)
 
