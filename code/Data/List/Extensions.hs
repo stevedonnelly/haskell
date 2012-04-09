@@ -1,5 +1,7 @@
 
 module Data.List.Extensions where
+import Control.DeepSeq as DeepSeq
+import Control.DeepSeq.Extensions as DeepSeqExt
 import Data.Ix as Ix
 import Data.List as List
 import Data.Map as Map
@@ -12,6 +14,9 @@ count :: Eq a => [a] -> a -> Int
 count = \list x -> (List.length (List.filter ((==) x) list))
 
 map2 = \function first second -> (List.map (uncurry function) (zip first second))
+
+foldl'' :: NFData a => NFData b => (a -> b -> a) -> a -> [b] -> a
+foldl'' = \function -> (List.foldl (strict2 function))
 
 product = \as bs -> let
     zipRow = \a -> let
