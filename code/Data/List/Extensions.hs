@@ -16,7 +16,10 @@ count = \list x -> (List.length (List.filter ((==) x) list))
 map2 = \function first second -> (List.map (uncurry function) (zip first second))
 
 foldl'' :: NFData a => NFData b => (a -> b -> a) -> a -> [b] -> a
-foldl'' = \function -> (List.foldl (strict2 function))
+foldl'' = \function initial list -> let
+    next = (function initial (head list))
+    result = (deepseq next (foldl'' function next (tail list)))
+    in (ifElse (List.null list) initial result)
 
 product = \as bs -> let
     zipRow = \a -> let
