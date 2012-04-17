@@ -30,6 +30,13 @@ product = \as bs -> let
 crossProduct :: [a] -> [b] -> [(a,b)]
 crossProduct = (curry ((.) concat (uncurry Data.List.Extensions.product)))
 
+crossProducts :: [[a]] -> [[a]]
+crossProducts = \lists -> let
+    recurse = (crossProducts (tail lists))
+    current = (crossProduct (head lists) recurse)
+    result = (List.map (uncurry (:)) current)
+    in (ifElse (List.null lists) [[]] result)
+
 pushLast = \list x -> ((++) list [x])
 
 dropLast = \list -> (reverse (tail (reverse list)))
