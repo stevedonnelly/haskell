@@ -30,9 +30,9 @@ directedGraph = \polygon -> (Map.fromList (List.map (\f -> (endpoint0 f, [endpoi
 translate = \polygon translation -> (List.map (V.add translation) polygon)
 rotate = \polygon angle -> (List.map (M.transform (M2d.rotation angle)) polygon)
 transform = \polygon center angle translation -> let
-    centered = (translate polygon (V.negate center))
+    centered = (Geometry.Polygon.translate polygon (V.negate center))
     rotated = (Geometry.Polygon.rotate centered angle)
-    translated = (translate rotated (V.add center translation))
+    translated = (Geometry.Polygon.translate rotated (V.add center translation))
     in translated
 
 pointIntersection = \polygon point -> let
