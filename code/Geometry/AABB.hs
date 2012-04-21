@@ -18,6 +18,9 @@ fromMinMax = \min max -> (min, max)
 
 center = \aabb -> (V.scale ((%) 1 2) (V.add (minCorner aabb) (maxCorner aabb)))
 
+translate = \aabb translation -> let
+    in (fromMinMax (V.add (minCorner aabb) translation) (V.add (maxCorner aabb) translation))
+
 isValidDimensions :: AABB -> Bool
 isValidDimensions = \aabb -> let
     same_size = ((==) (V.size (minCorner aabb)) (V.size (maxCorner aabb)))
