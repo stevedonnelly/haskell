@@ -154,14 +154,13 @@ convexPenetrationDepth = \a_points b_points -> let
     b_negated_edges = (pointsToEdges (List.map V.negate b_points))
     minkowski_sum = (convexMinkowskiSumEdges a_edges b_negated_edges)
     origin = (V.zero 2)
-    closerToOrigin = \a b -> let
-        distance = \p -> (LS.distanceSquaredToPoint p origin)
-        in ((<=) (distance a) (distance b))
-    closest = (List.foldr (select2 closerToOrigin) (head minkowski_sum) (tail minkowski_sum))
+    distances_to_origin = (List.map (flip LS.distanceSquaredToPoint origin) minkowski_sum)
+    closest = (snd (List.minimum (zip distances_to_origin minkowski_sum)))
     to_origin = (V.subtract origin (LS.closestPoint closest origin))
     is_inside = ((<=) (dotProduct to_origin (edgeNormal closest)) 0)
     in (is_inside, to_origin)
 
+--TODO: rewrite this, make return a 3-tuple
 convexIntersection = \a_points b_points -> let
     (is_overlap, penetration) = (convexPenetrationDepth a_points b_points)
     b_edges = (pointsToEdges b_points)
