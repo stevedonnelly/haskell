@@ -109,43 +109,18 @@ intersection = \polygon0 polygon1 -> let
     inside_graph = (filterIntersectionGraph graph inside_set polygon0 polygon1)
     in (extractPolygonCycles inside_graph)
 
-minimumYPoint = \points -> let
-    preconditions = (ListExt.notNull points)
-    x = ((flip V.element) 0)
-    y = ((flip V.element) 1)
-    yLess = \a b -> ((<) (y a) (y b)) 
-    xLess = \a b -> ((&&) ((==) (y a) (y b)) ((<) (x a) (x b)))
-    isLowerLeft = \a b -> ((||) (yLess a b) (xLess a b))
-    result = (List.foldr (select2 isLowerLeft) (List.head points) (List.tail points))
-    in (assert preconditions result)
-
-sortCounterClockwise = \points -> let
-    minimum_y = (minimumYPoint points)
-    x_axis = (V.fromList [1, 0])
-    pointToAngle = \point -> let
-        to_point = (V.subtract point minimum_y)
-        length = (V.length to_point)
-        angle = ((/) (dotProduct to_point x_axis) length)
-        in (ifElse ((==) length 0) (1, point) (angle, point))
-    in (snd (unzip (List.sortBy (flip compare) (List.map pointToAngle points))))
+isLeftTurn = \p0 p1 p2 -> ((>) (V2d.crossProduct (V.subtract p1 p0) (V.subtract p2 p0)) 0)
 
 convexHull = \points -> let
-    number_of_points = (List.length points)
-    sorted = (sortCounterClockwise points)
-    stack = [(head (tail sorted)), (head (sorted))]
-    remaining = ((++) (tail (tail sorted)) [(head sorted)])
-    isLeftTurn = \p0 p1 p2 -> let
-        v01 = (V.subtract p1 p0)
-        v02 = (V.subtract p2 p0)
-        in ((>) (V2d.crossProduct v01 v02) 0)
+    sorted_points = (List.sort (List.map V.toList points))
     buildHull = \stack point -> let
-        popRightTurns = \stack -> let
-            one_in_stack = (List.null (tail stack))
-            is_left = (isLeftTurn (head (tail stack)) (head stack) point)
-            in (ifElse ((||) one_in_stack is_left) stack (popRightTurns (tail stack)))
-        in ((:) point (popRightTurns stack))
-    hull = (List.foldl buildHull stack remaining)
-    in (List.reverse (List.tail hull))
+        lessThanTwo = \stack -> ((||) (List.null stack) (List.null (tail stack)))
+        turnsLeft = \stack -> (isLeftTurn ((!!) stack 1) ((!!) stack 0) point)
+        convex_stack = (until (\x -> ((||) (lessThanTwo x) (turnsLeft x))) tail stack)
+        in ((:) point convex_stack)
+    bottom = (List.foldl buildHull [] sorted_points)
+    top = (List.foldr (flip buildHull) [] sorted_points)
+    in ((++) (List.reverse (tail bottom)) (List.reverse (tail top)))
 
 pointsToEdges = \points -> (zip points (rotateLeft points))
 
