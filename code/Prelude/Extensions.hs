@@ -4,11 +4,13 @@ import Data.List as List
 import Data.Map as Map
 import Data.Ratio as Ratio
 import Data.Set as Set
-import System.Random as Random
 import System.IO.Unsafe as Unsafe
+import System.Random as Random
 
 
 ifElse = \boolean a b -> if boolean then a else b
+
+while = \predicate -> (until ((.) not predicate))
 
 maybeIf = \boolean value -> (ifElse boolean (Just value) Nothing)
 
