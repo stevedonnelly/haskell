@@ -122,36 +122,32 @@ convexHull = \points -> let
     top = (List.foldr (flip buildHull) [] sorted_points)
     in ((++) (List.reverse (tail bottom)) (List.reverse (tail top)))
 
-pointsToEdges = \points -> (zip points (rotateLeft points))
+pointsToEdges = \points -> (List.map (uncurry LS.fromEndpoints) (zip points (rotateLeft points)))
 
-edgeNormal = \(a, b) -> (V2d.perpendicular (V.subtract a b))
-edgeNormalAngle = \(a, b) -> (V2d.toAngle (edgeNormal (a, b)))
+edgeNormal = ((.) V2d.perpendicular LS.direction)
+edgeNormalAngle = ((.) V2d.toAngle edgeNormal)
 
--- edges are (a, b) point pairs, edge normal is defined from a to b, rotated right 
+--TODO: handle parallel faces (duplicate angle keys in map)
 gaussianMap = \edges -> let
-    in (Map.fromList (List.map (\edge -> ((edgeNormalAngle edge), edge)) edges))
-
+    normal_map = (Map.fromList (List.map (\edge -> (edgeNormalAngle edge, edge)) edges))
+    (min, max) = (Map.findMin normal_map, Map.findMax normal_map)
+    wrapped_min = (Map.insert ((+) (fst min) 360) (snd min) normal_map)
+    wrapped_max = (Map.insert ((-) (fst max) 360) (snd max) wrapped_min)
+    in wrapped_max
 
 compatibleVertices = \gaussian_map angle -> let
-    toList = \(a, b) -> [a, b]
     (less, equal, greater) = (Map.splitLookup angle gaussian_map)
-    parallel = [(fst (fromJust equal)), (snd (fromJust equal))]
-    is_outside_map = ((||) (Map.null less) (Map.null greater))
-    outside = (List.intersect (toList (snd (Map.findMax gaussian_map))) (toList (snd (Map.findMin gaussian_map))))
-    inside = (List.intersect (toList (snd (Map.findMax less))) (toList (snd (Map.findMin greater))))
-    in (ifElse (isJust equal) parallel (ifElse is_outside_map outside inside))
-
+    parallel = [LS.endpoint0 (fromJust equal), LS.endpoint1 (fromJust equal)]
+    result = [LS.endpoint1 (snd (Map.findMax less))]
+    in (ifElse (isJust equal) parallel result)
 
 convexMinkowskiSumEdges = \a_edges b_edges -> let
     a_map = (gaussianMap a_edges)
     b_map = (gaussianMap b_edges)
-    edgeVertices = \map edge -> (compatibleVertices map (edgeNormalAngle edge))
     edgeVertexFacets = \gaussian_map edge -> let
-        vertices = (edgeVertices gaussian_map edge)
-        in (List.map (\x -> ((V.add x (fst edge)), (V.add x (snd edge)))) vertices)
+        vertices = (compatibleVertices gaussian_map (edgeNormalAngle edge))
+        in (List.map (LS.translate edge) vertices)
     in ((++) (concat (List.map (edgeVertexFacets b_map) a_edges)) (concat (List.map (edgeVertexFacets a_map) b_edges)))
-
-
 
 convexPenetrationDepth = \a_points b_points -> let
     a_edges = (pointsToEdges a_points)

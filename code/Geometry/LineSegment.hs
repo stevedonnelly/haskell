@@ -25,6 +25,9 @@ scalarPoint = \s t -> (Line.scalarPoint (line s) t)
 projectionScalar = \s p -> (Line.projectionScalar (line s) p)
 midpoint = (flip scalarPoint ((%) 1 2))
 
+translate = \segment translation -> let
+    in (fromEndpoints (V.add (endpoint0 segment) translation) (V.add (endpoint1 segment) translation))
+
 closestPoint = \segment point -> let
     scalar = (projectionScalar segment point)
     projection = (scalarPoint segment scalar)
