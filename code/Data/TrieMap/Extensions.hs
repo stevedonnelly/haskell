@@ -4,7 +4,7 @@ import qualified Data.Map as Map
 import Prelude hiding (null)
 import Prelude.Extensions as PreludeExt
 
-data TrieMap k a = TrieNode (Bool, a) (Map.Map k (TrieMap k a))
+data TrieMap k a = TrieNode (Bool, a) (Map.Map k (TrieMap k a)) deriving (Show, Eq)
 nodeValue = \(TrieNode x m) -> x
 nodeMap = \(TrieNode x m) -> m
 
@@ -18,8 +18,8 @@ insert = \keys value trie -> let
     subtrie = (ifElse (Map.member key tree) ((Map.!) tree key) empty)
     recurse = (insert (tail keys) value subtrie)
     recurse_result = (TrieNode (nodeValue trie) (Map.insert key recurse tree))
-    base = (TrieNode (True, value) (nodeMap trie))
-    in (ifElse (List.null keys) base recurse)
+    base = (TrieNode (True, value) tree)
+    in (ifElse (List.null keys) base recurse_result)
 
 traverse :: Ord k => [k] -> (TrieMap k a) -> (TrieMap k a)
 traverse = \key trie -> let
@@ -39,8 +39,8 @@ delete = \keys trie -> let
     recurse = (ifElse (Map.member key tree) (delete (tail keys) ((Map.!) tree key)) empty)
     recurse_map = (ifElse (null recurse) (Map.delete key tree) (Map.insert key recurse tree))
     recurse_result = (TrieNode (nodeValue trie) recurse_map)
-    base = (TrieNode (False, undefined) (nodeMap trie))
-    in (ifElse (List.null keys) base recurse)
+    base = (TrieNode (False, undefined) tree)
+    in (ifElse (List.null keys) base recurse_result)
 
 toList :: Ord k => (TrieMap k a) -> [([k], a)]
 toList = \trie -> let
