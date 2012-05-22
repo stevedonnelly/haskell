@@ -51,3 +51,9 @@ toList = \trie -> let
         in ((++) current recurse)
     in (toList [] trie)
 
+keys :: Ord k => (TrieMap k a) -> [[k]]
+keys = ((.) (List.map fst) toList)
+elems :: Ord k => (TrieMap k a) -> [a]
+elems = ((.) (List.map snd) toList)
+
+
