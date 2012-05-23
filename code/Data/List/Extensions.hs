@@ -13,6 +13,8 @@ notNull = ((.) not List.null)
 count :: Eq a => [a] -> a -> Int
 count = \list x -> (List.length (List.filter ((==) x) list))
 
+singleton = \x -> [x]
+
 map2 = \function first second -> (List.map (uncurry function) (zip first second))
 
 foldl'' :: NFData a => NFData b => (a -> b -> a) -> a -> [b] -> a
