@@ -33,12 +33,12 @@ traverseIf = \key trie -> let
     recurse = (ifElse recurse_condition recurse_traverse (False, trie))
     in (ifElse (List.null key) (True, trie) recurse)
 
-traverseValue :: Ord k => ([k], TrieMap k a) -> (Bool, a)
-traverseValue = \(key, trie) -> (nodeValue (traverse key trie))
 member :: Ord k => [k] -> (TrieMap k a) -> Bool
-member = (curry ((.) fst traverseValue))
+member = \key trie -> let
+    (found, subtrie) = (traverseIf key trie)
+    in ((&&) found (fst (nodeValue subtrie)))
 lookup :: Ord k => [k] -> (TrieMap k a) -> a
-lookup = (curry ((.) snd traverseValue))
+lookup = \key trie -> (snd (nodeValue (traverse key trie)))
 
 delete :: Ord k => [k] -> (TrieMap k a) -> (TrieMap k a)
 delete = \keys trie -> let
