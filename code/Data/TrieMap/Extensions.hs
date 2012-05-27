@@ -26,6 +26,13 @@ traverse = \key trie -> let
     recurse = (traverse (tail key) ((Map.!) (nodeMap trie) (head key)))
     in (ifElse (List.null key) trie recurse)
 
+traverseIf :: Ord k => [k] -> (TrieMap k a) -> (Bool, TrieMap k a)
+traverseIf = \key trie -> let
+    recurse_condition = (Map.member (head key) (nodeMap trie))
+    recurse_traverse = (traverseIf (tail key) ((Map.!) (nodeMap trie) (head key)))
+    recurse = (ifElse recurse_condition recurse_traverse (False, trie))
+    in (ifElse (List.null key) (True, trie) recurse)
+
 traverseValue :: Ord k => ([k], TrieMap k a) -> (Bool, a)
 traverseValue = \(key, trie) -> (nodeValue (traverse key trie))
 member :: Ord k => [k] -> (TrieMap k a) -> Bool
