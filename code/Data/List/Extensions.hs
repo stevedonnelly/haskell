@@ -67,6 +67,14 @@ splitOn = \value list -> let
     (current, lists) = (List.foldr splitter ([], []) list)
     in ((:) current lists)
 
+indentWith :: String -> String -> String
+indentWith = \tab string -> let
+    in (unlines (List.map ((++) tab) (lines string)))
+    
+indent :: String -> String
+indent = indentWith "\t"
+
+
 range = \low high -> (Ix.range (low, ((-) high 1)))
 
 range0 = (Data.List.Extensions.range 0)
