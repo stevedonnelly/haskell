@@ -2,6 +2,7 @@
 module Prelude.Extensions where
 import Data.List as List
 import Data.Map as Map
+import Data.Maybe as Maybe
 import Data.Ratio as Ratio
 import Data.Set as Set
 import System.IO.Unsafe as Unsafe
@@ -13,6 +14,8 @@ ifElse = \boolean a b -> if boolean then a else b
 while = \predicate -> (until ((.) not predicate))
 
 maybeIf = \boolean value -> (ifElse boolean (Just value) Nothing)
+
+splitMaybe = \maybe -> (isJust maybe, fromJust maybe)
 
 cases = \pairs otherwise -> let
     (bool, value) = (head pairs)
