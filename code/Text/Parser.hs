@@ -77,8 +77,8 @@ productionParser = \productions tokens -> let
         in (ifElse ((>) size1 size0) (id1, (tree1, errors1, tokens1)) (id0, (tree0, errors0, tokens0)))
     result = (List.foldl selectProduction (0, head parses) (zipIndices0 parses))
     (id, (tree, errors, remaining)) = result
-    has_success = (or (List.map ((.) List.null snd3) parses))
-    all_errors = [(ProductionError (List.map snd3 parses))]
+    has_success = (or (List.map ((.) List.null second3) parses))
+    all_errors = [(ProductionError (List.map second3 parses))]
     in (ifElse has_success (Production id tree, [], remaining) (Empty, all_errors, tokens))
 
 listParser :: ParseFunction -> ParseFunction
