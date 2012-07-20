@@ -9,11 +9,11 @@ import Data.Tuple.Extensions as TupleExt
 import Geometry.AABB as AABB
 
 type SpatialHash a = (Map Vector a, Vector, Vector)
-positionMap = fst3
-origin = snd3
+positionMap = first3
+origin = second3
 binDimensions = third3
-setPositionMap = setFst3
-setOrigin = setSnd3
+setPositionMap = setFirst3
+setOrigin = setSecond3
 setBinDimensions = setThird3
 
 pointHash :: Vector -> Vector -> Vector
