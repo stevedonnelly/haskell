@@ -10,10 +10,10 @@ import Prelude.Extensions as PreludeExt
 
 
 type Particle = (Rational, Vector, Vector)
-mass = fst3
-setMass = setFst3
-position = snd3
-setPosition = setSnd3
+mass = first3
+setMass = setFirst3
+position = second3
+setPosition = setSecond3
 velocity = third3
 setVelocity = setThird3
 

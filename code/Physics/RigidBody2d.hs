@@ -12,10 +12,10 @@ import Prelude.Extensions as PreludeExt
 
 
 type RigidBody2d = (Particle.Particle, Rational, Rational, Rational)
-particle = fst4
-setParticle = setFst4
-inertiaMoment = snd4
-setInertiaMoment = setSnd4
+particle = first4
+setParticle = setFirst4
+inertiaMoment = second4
+setInertiaMoment = setSecond4
 orientation = third4
 setOrientation = setThird4
 angularVelocity = fourth4
@@ -34,7 +34,7 @@ move = \rigid_body time -> let
     in (setOrientation (setParticle rigid_body new_particle) new_orientation)
 
 applyForces = \rigid_body forces time -> let
-    linear_force = (Vector.sum (List.map snd forces))
+    linear_force = (Vector.sum (List.map second forces))
     relative_forces = (Dynamics.relativePointForces (Physics.RigidBody2d.position rigid_body) forces)
     torque = (List.sum (List.map (uncurry Vector2d.crossProduct) relative_forces))
     new_particle = (Particle.applyForce (particle rigid_body) linear_force time)
