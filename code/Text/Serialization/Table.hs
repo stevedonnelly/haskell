@@ -27,8 +27,8 @@ isIdentifier = \table -> case table of
     _ -> False
 
 subtables = \(Subtables name by_index by_name) -> (name, by_index, by_name)
-subtablesName = ((.) fst3 subtables)
-indexedSubtables = ((.) snd3 subtables)
+subtablesName = ((.) first3 subtables)
+indexedSubtables = ((.) second3 subtables)
 namedSubtables = ((.) third3 subtables)
 atom = \(Atom string) -> string
 identifier = \(Identifier name) -> name
