@@ -37,4 +37,32 @@ setThird5 (a, b, c, d, e) x = (a, b, x, d, e)
 setFourth5 (a, b, c, d, e) x = (a, b, c, x, e)
 setFifth5 (a, b, c, d, e) x = (a, b, c, d, x)
 
+first6 (a, b, c, d, e, f) = a
+second6 (a, b, c, d, e, f) = b
+third6 (a, b, c, d, e, f) = c
+fourth6 (a, b, c, d, e, f) = d
+fifth6 (a, b, c, d, e, f) = e
+sixth6 (a, b, c, d, e, f) = f
+setFirst6 (a, b, c, d, e, f) x = (x, b, c, d, e, f)
+setSecond6 (a, b, c, d, e, f) x = (a, x, c, d, e, f)
+setThird6 (a, b, c, d, e, f) x = (a, b, x, d, e, f)
+setFourth6 (a, b, c, d, e, f) x = (a, b, c, x, e, f)
+setFifth6 (a, b, c, d, e, f) x = (a, b, c, d, x, f)
+setSixth6 (a, b, c, d, e, f) x = (a, b, c, d, e, x)
+
+first7 (a, b, c, d, e, f, g) = a
+second7 (a, b, c, d, e, f, g) = b
+third7 (a, b, c, d, e, f, g) = c
+fourth7 (a, b, c, d, e, f, g) = d
+fifth7 (a, b, c, d, e, f, g) = e
+sixth7 (a, b, c, d, e, f, g) = f
+seventh7 (a, b, c, d, e, f, g) = g
+setFirst7 (a, b, c, d, e, f, g) x = (x, b, c, d, e, f, g)
+setSecond7 (a, b, c, d, e, f, g) x = (a, x, c, d, e, f, g)
+setThird7 (a, b, c, d, e, f, g) x = (a, b, x, d, e, f, g)
+setFourth7 (a, b, c, d, e, f, g) x = (a, b, c, x, e, f, g)
+setFifth7 (a, b, c, d, e, f, g) x = (a, b, c, d, x, f, g)
+setSixth7 (a, b, c, d, e, f, g) x = (a, b, c, d, e, x, g)
+setSeventh7 (a, b, c, d, e, f, g) x = (a, b, c, d, e, f, x)
+
 
