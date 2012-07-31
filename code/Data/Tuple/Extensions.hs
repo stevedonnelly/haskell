@@ -65,4 +65,21 @@ setFifth7 (a, b, c, d, e, f, g) x = (a, b, c, d, x, f, g)
 setSixth7 (a, b, c, d, e, f, g) x = (a, b, c, d, e, x, g)
 setSeventh7 (a, b, c, d, e, f, g) x = (a, b, c, d, e, f, x)
 
+first8 (a, b, c, d, e, f, g, h) = a
+second8 (a, b, c, d, e, f, g, h) = b
+third8 (a, b, c, d, e, f, g, h) = c
+fourth8 (a, b, c, d, e, f, g, h) = d
+fifth8 (a, b, c, d, e, f, g, h) = e
+sixth8 (a, b, c, d, e, f, g, h) = f
+seventh8 (a, b, c, d, e, f, g, h) = g
+seventh8 (a, b, c, d, e, f, g, h) = h
+setFirst8 (a, b, c, d, e, f, g, h) x = (x, b, c, d, e, f, g, h)
+setSecond8 (a, b, c, d, e, f, g, h) x = (a, x, c, d, e, f, g, h)
+setThird8 (a, b, c, d, e, f, g, h) x = (a, b, x, d, e, f, g, h)
+setFourth8 (a, b, c, d, e, f, g, h) x = (a, b, c, x, e, f, g, h)
+setFifth8 (a, b, c, d, e, f, g, h) x = (a, b, c, d, x, f, g, h)
+setSixth8 (a, b, c, d, e, f, g, h) x = (a, b, c, d, e, x, g, h)
+setSeventh8 (a, b, c, d, e, f, g, h) x = (a, b, c, d, e, f, x, h)
+setEighth8 (a, b, c, d, e, f, g, h) x = (a, b, c, d, e, f, g, x)
+
 
