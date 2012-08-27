@@ -13,12 +13,11 @@ import Prelude.Extensions as PreludeExt
 
 type RigidBody2d = (Particle.Particle, Rational, Rational, Rational)
 particle = first4
-setParticle = setFirst4
 inertiaMoment = second4
-setInertiaMoment = setSecond4
 orientation = third4
-setOrientation = setThird4
 angularVelocity = fourth4
+setParticle = setFirst4
+setOrientation = setThird4
 setAngularVelocity = setFourth4
  
 mass = ((.) Particle.mass particle)
@@ -33,13 +32,14 @@ move = \rigid_body time -> let
     new_orientation = (Dynamics.integrateVelocity (orientation rigid_body) (angularVelocity rigid_body) time)
     in (setOrientation (setParticle rigid_body new_particle) new_orientation)
 
-applyForces = \rigid_body forces time -> let
-    linear_force = (Vector.sum (List.map second forces))
-    relative_forces = (Dynamics.relativePointForces (Physics.RigidBody2d.position rigid_body) forces)
+applyForce = \rigid_body point_force time -> (applyForces rigid_body [point_force] time)
+    
+applyForces = \rigid_body point_forces time -> let
+    relative_forces = (Dynamics.relativePointForces (Physics.RigidBody2d.position rigid_body) point_forces)
     torque = (List.sum (List.map (uncurry Vector2d.crossProduct) relative_forces))
-    new_particle = (Particle.applyForce (particle rigid_body) linear_force time)
-    acceleration = ((/) torque (inertiaMoment rigid_body))
     velocity = (angularVelocity rigid_body)
+    acceleration = ((/) torque (inertiaMoment rigid_body))
+    new_particle = (Particle.applyForces (particle rigid_body) (List.map second2 point_forces) time)
     new_orientation = (Dynamics.integrateAcceleration (orientation rigid_body) velocity acceleration time)
     new_velocity = (Dynamics.integrateVelocity velocity acceleration time)
     in (setAngularVelocity (setOrientation (setParticle rigid_body new_particle) new_orientation) new_velocity)
@@ -47,7 +47,7 @@ applyForces = \rigid_body forces time -> let
 linearForce = \rigid_body direction acceleration -> let
     mass = (Physics.RigidBody2d.mass rigid_body)
     position = (Physics.RigidBody2d.position rigid_body)
-    in (position, directedForce mass (Vector2d.fromAngle direction) acceleration)
+    in (position, Dynamics.directedForce mass (Vector2d.fromAngle direction) acceleration)
 
 relativeLinearForce = \rigid_body direction acceleration -> let
     in (linearForce rigid_body ((+) (orientation rigid_body) direction) acceleration)

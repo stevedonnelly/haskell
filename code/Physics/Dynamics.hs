@@ -28,7 +28,7 @@ frictionAcceleration :: Rational -> Rational -> Rational -> Rational
 frictionAcceleration = \velocity friction time -> let
     preconditions = ((&&) ((>=) velocity 0) ((&&) ((>=) friction 0) ((>=) time 0)))
     friction_magnitude = ((*) friction time)
-    stop = ((*) ((/) 1 time) velocity)
+    stop = ((/) velocity time)
     result = (ifElse ((==) time 0) 0 (ifElse ((<) friction_magnitude velocity) friction stop))
     in (assert preconditions result)
 
