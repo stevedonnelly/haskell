@@ -67,6 +67,9 @@ splitOn = \value list -> let
     (current, lists) = (List.foldr splitter ([], []) list)
     in ((:) current lists)
 
+allEqual :: Eq a => [a] -> Bool
+allEqual = \list -> ((||) (List.null list) (List.all ((==) (head list)) (tail list)))
+
 indentWith :: String -> String -> String
 indentWith = \tab string -> let
     in (unlines (List.map ((++) tab) (lines string)))
