@@ -1,4 +1,3 @@
-
 module Physics.RigidBody2d where
 import Algebra.Vector as Vector
 import Data.List as List
@@ -35,7 +34,7 @@ move = \rigid_body time -> let
 applyForce = \rigid_body point_force time -> (applyForces rigid_body [point_force] time)
     
 applyForces = \rigid_body point_forces time -> let
-    relative_forces = (Dynamics.relativePointForces (Physics.RigidBody2d.position rigid_body) point_forces)
+    relative_forces = (Dynamics.relativePointForces (position rigid_body) point_forces)
     torque = (List.sum (List.map (uncurry Vector2d.crossProduct) relative_forces))
     velocity = (angularVelocity rigid_body)
     acceleration = ((/) torque (inertiaMoment rigid_body))
@@ -43,53 +42,6 @@ applyForces = \rigid_body point_forces time -> let
     new_orientation = (Dynamics.integrateAcceleration (orientation rigid_body) velocity acceleration time)
     new_velocity = (Dynamics.integrateVelocity velocity acceleration time)
     in (setAngularVelocity (setOrientation (setParticle rigid_body new_particle) new_orientation) new_velocity)
-
-linearForce = \rigid_body direction acceleration -> let
-    mass = (Physics.RigidBody2d.mass rigid_body)
-    position = (Physics.RigidBody2d.position rigid_body)
-    in (position, Dynamics.directedForce mass (Vector2d.fromAngle direction) acceleration)
-
-relativeLinearForce = \rigid_body direction acceleration -> let
-    in (linearForce rigid_body ((+) (orientation rigid_body) direction) acceleration)
-
-spinForces = \rigid_body acceleration -> let
-    position = (Physics.RigidBody2d.position rigid_body)
-    forward_axis = (Vector2d.fromAngle (orientation rigid_body))
-    right_axis = (Vector2d.rotate forward_axis (toRational ((/) (Prelude.negate pi) 2)))
-    forward_force = (directedForce (inertiaMoment rigid_body) forward_axis ((/) acceleration 2))
-    left_force = ((Vector.subtract position right_axis), (Vector.negate forward_force))
-    right_force = ((Vector.add position right_axis), forward_force)
-    in [left_force, right_force]
-
-linearFrictionForce = \rigid_body acceleration time -> let
-    velocity = (Physics.RigidBody2d.velocity rigid_body)
-    decceleration = (Prelude.negate (Dynamics.frictionAcceleration (Vector.length velocity) acceleration time))
-    in (linearForce rigid_body (Vector2d.toAngle velocity) decceleration)
-
-spinFrictionForces = \rigid_body acceleration time -> let
-    velocity = (Physics.RigidBody2d.angularVelocity rigid_body)
-    decceleration = (Prelude.negate ((*) (signum velocity) (Dynamics.frictionAcceleration (abs velocity) acceleration time)))
-    in (spinForces rigid_body decceleration)
-
-frictionForces = \body friction angular_friction timestep -> let
-    forward_friction = (linearFrictionForce body friction timestep)
-    spin_friction = (spinFrictionForces body angular_friction timestep)
-    in ((:) forward_friction spin_friction)
-
-unlimitedLinearForces = \rigid_body max_velocity forces -> let
-    velocity = (Physics.RigidBody2d.velocity rigid_body)
-    withinMax = \(position, force) -> (isUnlimitedForce velocity max_velocity force)
-    in (List.filter withinMax forces)
-
-unlimitedSpinForces = \rigid_body max_velocity forces -> let
-    velocity = (Physics.RigidBody2d.angularVelocity rigid_body)
-    withinMax = \(position, force) -> let
-        less_than_max = ((<) (abs velocity) max_velocity)
-        direction = (Vector.subtract position (Physics.RigidBody2d.position rigid_body))
-        is_opposite = ((/=) (signum velocity) (signum (crossProduct direction force)))
-        in ((||) less_than_max is_opposite)
-    in (List.filter withinMax forces)
-
 
 velocityAtPoint = \rigid_body point -> let
     to_point = (Vector.subtract point (position rigid_body))
@@ -146,12 +98,6 @@ collisionDetection = \body_0 body_1 collision_point collision_normal elasticity 
     response = (collisionResponse body_0 body_1 collision_point collision_normal elasticity)
     in (ifElse is_collision (True, response) (False, (body_0, body_1)))
 
-
-circleInertiaMoment :: (Fractional r) => r -> r -> r
-circleInertiaMoment = \mass radius -> ((/) ((*) mass ((*) radius radius)) 4)
-
-rectangleInertiaMoment :: (Fractional r) => r -> r -> r -> r
-rectangleInertiaMoment = \mass width height -> ((/) ((*) mass ((+) ((*) width width) ((*) height height))) 12)
 
 setPrecision = \precision (particle, inertia, orientation, angular_velocity) -> let
     rp = (RatioExt.setPrecision precision)
