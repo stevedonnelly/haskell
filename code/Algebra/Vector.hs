@@ -2,6 +2,7 @@
 module Algebra.Vector where
 import Control.Exception.Base
 import Data.List as List
+import Data.List.Extensions as ListExt
 import qualified Data.List.Extensions as ListExt
 import qualified Data.Map as Map
 import Data.Ratio as Ratio
@@ -61,6 +62,10 @@ angle = \a b -> let
     dot = (dotProduct a b)
     lengths = ((*) (Algebra.Vector.length a) (Algebra.Vector.length b))
     in (toRational (acos (fromRational ((/) dot lengths))))
+
+isParallel = \a b -> let
+    scalars = (toList (map2 (/) b a))
+    in (ListExt.allEqual scalars, (ifElse (List.null scalars) 0 (head scalars)))
 
 lengthSquared = \v -> (dotProduct v v)
 
