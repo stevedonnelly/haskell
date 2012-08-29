@@ -9,10 +9,10 @@ import Prelude.Extensions as PreludeExt
 
 
 type Line = (Vector, Vector)
-point0 = fst
-point1 = snd
-setPoint0 = setFst
-setPoint1 = setSnd
+point0 = first2
+point1 = second2
+setPoint0 = setFirst2
+setPoint1 = setSecond2
 
 fromPoints = \a b -> (a, b)
 fromPointDirection = \p direction -> (p, V.add p direction)

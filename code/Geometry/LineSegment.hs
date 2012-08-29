@@ -11,10 +11,10 @@ import Prelude.Extensions as PreludeExt
 
 
 type LineSegment = (V.Vector, V.Vector)
-endpoint0 = fst
-endpoint1 = snd
-setEndpoint0 = setFst
-setEndpoint1 = setSnd
+endpoint0 = first2
+endpoint1 = second2
+setEndpoint0 = setFirst2
+setEndpoint1 = setSecond2
 
 fromEndpoints = \a b -> (a, b)
 fromPointDirection = \p direction -> (p, V.add p direction)

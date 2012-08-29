@@ -9,10 +9,10 @@ import Data.Tuple.Extensions as TupleExt
 
 
 type AABB = (Vector, Vector)
-minCorner = fst
-maxCorner = snd 
-setMinCorner = setFst 
-setMaxCorner = setSnd
+minCorner = first2
+maxCorner = second2 
+setMinCorner = setFirst2 
+setMaxCorner = setSecond2
 
 fromMinMax = \min max -> (min, max)
 
