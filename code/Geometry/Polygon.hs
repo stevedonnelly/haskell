@@ -125,30 +125,32 @@ convexHull = \points -> let
 pointsToEdges = \points -> (List.map (uncurry LS.fromEndpoints) (zip points (rotateLeft points)))
 
 edgeNormal = ((.) V2d.perpendicular LS.direction)
-edgeNormalAngle = ((.) V2d.toAngle edgeNormal)
+edgeNormalQuadrantRatio = ((.) V2d.quadrantRatio edgeNormal)
 
---TODO: handle parallel faces (duplicate angle keys in map)
+-- assumes every edge has a unique normal angle; i.e. no quadrant-ratio keys will duplicated in the normal map
 gaussianMap = \edges -> let
-    normal_map = (Map.fromList (List.map (\edge -> (edgeNormalAngle edge, edge)) edges))
-    (min, max) = (Map.findMin normal_map, Map.findMax normal_map)
-    wrapped_min = (Map.insert ((+) (fst min) 360) (snd min) normal_map)
-    wrapped_max = (Map.insert ((-) (fst max) 360) (snd max) wrapped_min)
+    normal_map = (Map.fromList (List.map (\edge -> (edgeNormalQuadrantRatio edge, edge)) edges))
+    (((q0, r0), min), ((q1, r1), max)) = (Map.findMin normal_map, Map.findMax normal_map)
+    wrapped_min = (Map.insert ((+) q0 4, r0) min normal_map)
+    wrapped_max = (Map.insert ((-) q1 4, r1) max wrapped_min)
     in wrapped_max
 
-compatibleVertices = \gaussian_map angle -> let
-    (less, equal, greater) = (Map.splitLookup angle gaussian_map)
+compatibleVertices = \gaussian_map quadrant -> let
+    (less, equal, greater) = (Map.splitLookup quadrant gaussian_map)
     parallel = [LS.endpoint0 (fromJust equal), LS.endpoint1 (fromJust equal)]
     result = [LS.endpoint1 (snd (Map.findMax less))]
     in (ifElse (isJust equal) parallel result)
 
+-- assumes no sequential edges are parallel
 convexMinkowskiSumEdges = \a_edges b_edges -> let
     a_map = (gaussianMap a_edges)
     b_map = (gaussianMap b_edges)
     edgeVertexFacets = \gaussian_map edge -> let
-        vertices = (compatibleVertices gaussian_map (edgeNormalAngle edge))
+        vertices = (compatibleVertices gaussian_map (edgeNormalQuadrantRatio edge))
         in (List.map (LS.translate edge) vertices)
     in ((++) (concat (List.map (edgeVertexFacets b_map) a_edges)) (concat (List.map (edgeVertexFacets a_map) b_edges)))
 
+-- assumes no sequential edges are parallel; this requirement can be ensured by first calling the convexHull function on each polygon
 convexPenetrationDepth = \a_points b_points -> let
     a_edges = (pointsToEdges a_points)
     b_negated_edges = (pointsToEdges (List.map V.negate b_points))
@@ -160,13 +162,12 @@ convexPenetrationDepth = \a_points b_points -> let
     is_inside = ((<=) (dotProduct to_origin (edgeNormal closest)) 0)
     in (is_inside, to_origin)
 
---TODO: rewrite this, make return a 3-tuple
 convexIntersection = \a_points b_points -> let
     (is_overlap, penetration) = (convexPenetrationDepth a_points b_points)
     b_edges = (pointsToEdges b_points)
     map = (gaussianMap b_edges)
-    contact = (head (compatibleVertices map (V2d.toAngle penetration)))
-    in (is_overlap, (contact, penetration))
+    contact = (head (compatibleVertices map (V2d.quadrantRatio penetration)))
+    in (is_overlap, contact, penetration)
 
 
 setPrecision = \precision -> (List.map (V.setPrecision precision))
