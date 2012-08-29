@@ -64,7 +64,7 @@ angle = \a b -> let
 
 isParallel = \a b -> let
     scalars = (toList (map2 (/) b a))
-    in (ListExt.allEqual scalars, (ifElse (List.null scalars) 0 (head scalars)))
+    in (ListExt.allEqual scalars, (ifElse (List.null scalars) (0::Rational) (head scalars)))
 
 lengthSquared = \v -> (dotProduct v v)
 
