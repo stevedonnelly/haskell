@@ -18,6 +18,14 @@ quadrant = \vector -> let
         ((&&) ((>=) x 0) ((>) 0 y), 3)]
     in (cases case_list (-1))
 
+quadrantRatio :: Vector -> (Int, Rational)
+quadrantRatio = \vector -> let
+    (x, y) = (Vector.element vector 0, Vector.element vector 1)
+    quad = (quadrant vector)
+    x_y = ((/) (abs x) (abs y))
+    y_x = ((/) (abs y) (abs x))
+    in (quad, (ifElse ((==) (mod quad 2) 0) y_x x_y))
+
 fromAngle = \angle -> let
     a = (fromRational angle)
     cosa = (toRational (cos a))

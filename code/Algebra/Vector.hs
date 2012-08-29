@@ -2,7 +2,6 @@
 module Algebra.Vector where
 import Control.Exception.Base
 import Data.List as List
-import Data.List.Extensions as ListExt
 import qualified Data.List.Extensions as ListExt
 import qualified Data.Map as Map
 import Data.Ratio as Ratio
