@@ -3,7 +3,7 @@ module Geometry.Polygon where
 import Algebra.Matrix as M
 import Algebra.Vector as V
 import Control.Exception.Base
-import Data.Graph.Extensions as Graph
+import qualified Data.Graph.Extensions as Graph
 import Data.List as List
 import Data.List.Extensions as ListExt
 import Data.Map as Map
@@ -23,10 +23,10 @@ type Polygon = [V.Vector]
 fromPoints = id
 points = id
 
---TODO: refactor out duplication with pointsToEdges function
-faces = \polygon -> (ListExt.map2 LS.fromEndpoints (points polygon) (ListExt.rotateLeft (points polygon)))
+pointsToEdges = \points -> (ListExt.map2 LS.fromEndpoints points (rotateLeft points))
+edges = ((.) pointsToEdges points)
 
-directedGraph = \polygon -> (Map.fromList (List.map (\f -> (endpoint0 f, [endpoint1 f])) (faces polygon)))
+directedGraph = \polygon -> (Map.fromList (List.map (\e -> (endpoint0 e, [endpoint1 e])) (edges polygon)))
 
 translate = \polygon translation -> (List.map (V.add translation) polygon)
 rotate = \polygon angle -> (List.map (M.transform (M2d.rotation angle)) polygon)
@@ -37,30 +37,30 @@ transform = \polygon center angle translation -> let
     in translated
 
 pointIntersection = \polygon point -> let
-    walkBoundary = \(winding_number, on_boundary) face -> let
+    walkBoundary = \(winding_number, on_boundary) edge -> let
         toQuadrant = ((.) V2d.quadrant (flip V.subtract point))
-        [start, stop] = (List.map toQuadrant [endpoint0 face, endpoint1 face])
+        [start, stop] = (List.map toQuadrant [endpoint0 edge, endpoint1 edge])
         quadrant = ((-) stop start)
-        turn = (V2d.crossProduct (LS.direction face) (V.subtract point (LS.endpoint0 face)))
+        turn = (V2d.crossProduct (LS.direction edge) (V.subtract point (LS.endpoint0 edge)))
         turn_cases = [((>) turn 0, ((ifElse ((<) quadrant 0) ((+) quadrant 4) quadrant), False)),
             ((<) turn 0, ((ifElse ((>) quadrant 0) ((-) quadrant 4) quadrant), False))]
-        (winding_change, boundary_change) = (cases turn_cases (0, LS.pointIntersection face point))
+        (winding_change, boundary_change) = (cases turn_cases (0, LS.pointIntersection edge point))
         in ((+) winding_number winding_change, (||) on_boundary boundary_change)
-    (winding_number, on_boundary) = (List.foldl walkBoundary (0, False) (faces polygon))
+    (winding_number, on_boundary) = (List.foldl walkBoundary (0, False) (edges polygon))
     in ((||) ((==) winding_number 4) on_boundary)
 
 intersectionSubdivision :: Polygon -> (Map Int [Vector]) -> Polygon
 intersectionSubdivision = \polygon intersection_lookup -> let
-    faceSubdivision = \(id, face) -> let
+    edgeSubdivision = \(id, edge) -> let
         intersections = ((!) intersection_lookup id)
-        scalar_points = (Map.fromList (List.map (\x -> (LS.projectionScalar face x, x)) intersections))
-        in (Map.elems (Map.delete 1 (Map.insert 0 (endpoint0 face) scalar_points)))
-    in (fromPoints (concat (List.map faceSubdivision (zipIndices0 (faces polygon)))))
+        scalar_points = (Map.fromList (List.map (\x -> (LS.projectionScalar edge x, x)) intersections))
+        in (Map.elems (Map.delete 1 (Map.insert 0 (endpoint0 edge) scalar_points)))
+    in (fromPoints (concat (List.map edgeSubdivision (zipIndices0 (edges polygon)))))
 
-intersectionGraph :: Polygon -> Polygon -> (Graph Vector, Set Vector)
+intersectionGraph :: Polygon -> Polygon -> (Graph.Graph Vector, Set Vector)
 intersectionGraph = \polygon0 polygon1 -> let
-    face_pairs = (ListExt.crossProduct (zipIndices0 (faces polygon0)) (zipIndices0 (faces polygon1)))
-    intersections = (List.map (\((id0, f0), (id1, f1)) -> (id0, id1, LS.intersection f0 f1)) face_pairs)
+    edge_pairs = (ListExt.crossProduct (zipIndices0 (edges polygon0)) (zipIndices0 (edges polygon1)))
+    intersections = (List.map (\((id0, f0), (id1, f1)) -> (id0, id1, LS.intersection f0 f1)) edge_pairs)
     (take02, take12) = (\(a,b,c) -> (a,c), \(a,b,c) -> (b,c))
     subdivision0 = (intersectionSubdivision polygon0 (Map.fromListWith (++) (List.map take02 intersections)))
     subdivision1 = (intersectionSubdivision polygon1 (Map.fromListWith (++) (List.map take12 intersections)))
@@ -79,7 +79,7 @@ filterIntersectionGraph = \graph inside_set polygon0 polygon1 -> let
         in ((&&) (pointIntersection polygon0) (pointIntersection polygon1))
     in (Graph.fromEdges (List.filter insideGraph (Graph.edges inside_vertices)))
 
-extractPolygonCycle :: (Graph Vector) -> [Vector] -> [Vector] -> (Bool, [Vector])
+extractPolygonCycle :: (Graph.Graph Vector) -> [Vector] -> [Vector] -> (Bool, [Vector])
 extractPolygonCycle = \graph start path -> let
     (current, previous, neighbors) = (head path, head (tail path), (!) graph current)
     outwardsAngle = \x -> (V2d.positiveAngle (V.subtract previous current) (V.subtract x current))
@@ -89,7 +89,7 @@ extractPolygonCycle = \graph start path -> let
     is_complete = ((&&) ((==) prefix start) (ListExt.notNull suffix))
     in (ifElse is_complete (True,List.reverse suffix) (ifElse (List.null neighbors) (False,path) recurse))
 
-extractPolygonCycles :: (Graph Vector) -> [Polygon]
+extractPolygonCycles :: (Graph.Graph Vector) -> [Polygon]
 extractPolygonCycles = \graph -> let
     extractPolygonCycles = \graph -> let
         (start, neighbors) = (Map.findMax graph)
@@ -123,8 +123,6 @@ convexHull = \points -> let
     top = (List.foldr (flip buildHull) [] sorted_points)
     in ((++) (List.reverse (tail bottom)) (List.reverse (tail top)))
 
-pointsToEdges = \points -> (List.map (uncurry LS.fromEndpoints) (zip points (rotateLeft points)))
-
 edgeNormal = ((.) V.negate ((.) V2d.perpendicular LS.direction))
 edgeNormalQuadrantRatio = ((.) V2d.quadrantRatio edgeNormal)
 
@@ -146,10 +144,10 @@ compatibleVertices = \gaussian_map quadrant -> let
 convexMinkowskiSumEdges = \a_edges b_edges -> let
     a_map = (gaussianMap a_edges)
     b_map = (gaussianMap b_edges)
-    edgeVertexFacets = \gaussian_map edge -> let
+    edgeVertexEdges = \gaussian_map edge -> let
         vertices = (compatibleVertices gaussian_map (edgeNormalQuadrantRatio edge))
         in (List.map (LS.translate edge) vertices)
-    in ((++) (concat (List.map (edgeVertexFacets b_map) a_edges)) (concat (List.map (edgeVertexFacets a_map) b_edges)))
+    in ((++) (concat (List.map (edgeVertexEdges b_map) a_edges)) (concat (List.map (edgeVertexEdges a_map) b_edges)))
 
 -- assumes no sequential edges are parallel; this requirement can be ensured by first calling the convexHull function on each polygon
 convexPenetrationDepth = \a_points b_points -> let
