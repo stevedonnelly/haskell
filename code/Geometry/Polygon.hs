@@ -158,7 +158,7 @@ convexPenetrationDepth = \a_points b_points -> let
     distances_to_origin = (List.map (flip LS.distanceSquaredToPoint origin) minkowski_sum)
     closest = (snd (List.minimum (zip distances_to_origin minkowski_sum)))
     to_origin = (V.subtract origin (LS.closestPoint closest origin))
-    is_inside = ((<=) (dotProduct to_origin (edgeNormal closest)) 0)
+    is_inside = ((<) (dotProduct to_origin (edgeNormal closest)) 0)
     in (is_inside, to_origin)
 
 convexIntersection = \a_points b_points -> let
@@ -167,13 +167,7 @@ convexIntersection = \a_points b_points -> let
     b_map = (gaussianMap (pointsToEdges b_points))
     a_contacts = (compatibleVertices a_map (V2d.quadrantRatio (V.negate penetration)))
     b_contacts = (compatibleVertices b_map (V2d.quadrantRatio penetration))
-    isSingle = \list -> ((==) (List.length list) 1)
-    toEdge = \[a, b] -> (LS.fromEndpoints a b)
-    (a_edge, b_edge) = (toEdge a_contacts, toEdge b_contacts)
-    case_list = [(isSingle a_contacts, head a_contacts),
-        (isSingle b_contacts, head b_contacts),
-        ((<=) (LS.lengthSquared a_edge) (LS.lengthSquared b_edge), LS.midpoint a_edge)]
-    contact = (cases case_list (LS.midpoint b_edge))
+    contact = (ifElse ((==) (List.length a_contacts) 1) (head a_contacts) (head b_contacts))
     in (is_overlap, contact, penetration)
 
 
