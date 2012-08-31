@@ -6,6 +6,7 @@ import qualified Data.List.Extensions as ListExt
 import qualified Data.Map as Map
 import Data.Ratio as Ratio
 import Data.Ratio.Extensions as RatioExt
+import Data.Tuple.Extensions as TupleExt
 import Prelude.Extensions as PreludeExt
 
 
@@ -26,10 +27,7 @@ isZero = \v -> (all ((==) (0::Rational)) v)
 notZero = ((.) not isZero)
 
 map = List.map
-map2 = \f a b -> let
-    preconditions = (sameSize a b)
-    result = (List.map (uncurry f) (List.zip a b))
-    in (assert preconditions result)
+map2 = ListExt.map2
 
 add :: Vector -> Vector -> Vector
 add = (map2 (+))
@@ -63,8 +61,11 @@ angle = \a b -> let
     in (toRational (acos (fromRational ((/) dot lengths))))
 
 isParallel = \a b -> let
-    scalars = (toList (map2 (/) b a))
-    in (ListExt.allEqual scalars, (ifElse (List.null scalars) (0::Rational) (head scalars)))
+    pairs = (zip (toList b) (toList a))
+    (zero, nonzero) = (List.partition ((.) ((==) 0) second2) pairs)
+    both_zeros = (and (List.map ((.) ((==) 0) first2) zero))
+    scalars = (List.map (uncurry (/)) nonzero)
+    in ((&&) both_zeros (ListExt.allEqual scalars), (ifElse (List.null scalars) (0::Rational) (head scalars)))
 
 lengthSquared = \v -> (dotProduct v v)
 
