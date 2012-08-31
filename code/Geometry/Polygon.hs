@@ -23,6 +23,7 @@ type Polygon = [V.Vector]
 fromPoints = id
 points = id
 
+--TODO: refactor out duplication with pointsToEdges function
 faces = \polygon -> (ListExt.map2 LS.fromEndpoints (points polygon) (ListExt.rotateLeft (points polygon)))
 
 directedGraph = \polygon -> (Map.fromList (List.map (\f -> (endpoint0 f, [endpoint1 f])) (faces polygon)))
@@ -124,7 +125,7 @@ convexHull = \points -> let
 
 pointsToEdges = \points -> (List.map (uncurry LS.fromEndpoints) (zip points (rotateLeft points)))
 
-edgeNormal = ((.) V2d.perpendicular LS.direction)
+edgeNormal = ((.) V.negate ((.) V2d.perpendicular LS.direction))
 edgeNormalQuadrantRatio = ((.) V2d.quadrantRatio edgeNormal)
 
 -- assumes every edge has a unique normal angle; i.e. no quadrant-ratio keys will duplicated in the normal map
