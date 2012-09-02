@@ -168,7 +168,7 @@ convexPenetrationPoint = \a_points b_points -> let
     a_contacts = (compatibleVertices a_map (V2d.quadrantRatio (V.negate penetration)))
     b_contacts = (compatibleVertices b_map (V2d.quadrantRatio penetration))
     contact = (ifElse ((==) (List.length a_contacts) 1) (head a_contacts) (head b_contacts))
-    in (is_overlap, penetration, contact)
+    in (is_overlap, contact, penetration)
 
 
 setPrecision = \precision -> (List.map (V.setPrecision precision))
