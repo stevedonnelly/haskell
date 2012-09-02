@@ -161,14 +161,14 @@ convexPenetrationDepth = \a_points b_points -> let
     is_inside = ((<) (dotProduct to_origin (edgeNormal closest)) 0)
     in (is_inside, to_origin)
 
-convexIntersection = \a_points b_points -> let
+convexPenetrationPoint = \a_points b_points -> let
     (is_overlap, penetration) = (convexPenetrationDepth a_points b_points)
     a_map = (gaussianMap (pointsToEdges a_points))
     b_map = (gaussianMap (pointsToEdges b_points))
     a_contacts = (compatibleVertices a_map (V2d.quadrantRatio (V.negate penetration)))
     b_contacts = (compatibleVertices b_map (V2d.quadrantRatio penetration))
     contact = (ifElse ((==) (List.length a_contacts) 1) (head a_contacts) (head b_contacts))
-    in (is_overlap, contact, penetration)
+    in (is_overlap, penetration, contact)
 
 
 setPrecision = \precision -> (List.map (V.setPrecision precision))
