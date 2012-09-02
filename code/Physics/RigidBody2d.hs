@@ -25,6 +25,7 @@ velocity = ((.) Particle.velocity particle)
 setPosition = \body p -> (setParticle body (Particle.setPosition (particle body) p))
 setVelocity = \body v -> (setParticle body (Particle.setVelocity (particle body) v))
 
+translate = \body translation -> (setPosition body (Vector.add (position body) translation))
 
 move = \rigid_body time -> let
     new_particle = (Particle.move (particle rigid_body) time)
