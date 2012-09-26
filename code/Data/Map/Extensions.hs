@@ -43,4 +43,6 @@ memoize = \function -> let
         in (ifElse is_cached (cached, cache) (output, Map.insert input output cache))
     in memoized
 
+fromKeyList :: Ord k => (k -> a) -> [k] -> (Map k a)
+fromKeyList = \f keys -> (Map.fromList (List.map (\k -> (k, f k)) keys))
 
