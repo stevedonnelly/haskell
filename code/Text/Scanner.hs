@@ -11,13 +11,16 @@ import Text.Regex.Posix
 
 
 type Token = (Int, String)
-tokenId = fst
-text = snd
+tokenId = first2
+text = second2
+setText = setSecond2
 type IndexToken = (Int, Token)
-index = fst
+index = first2
 indexTokenId = ((.) tokenId token)
 indexTokenText = ((.) text token)
-token = snd
+token = second2
+setIndexTokenToken = setSecond2
+setIndexTokenText = \tok text -> (setIndexTokenToken tok (setText (token tok) text))
 
 matchFront :: String -> String -> (Bool, String)
 matchFront = \input regex -> (input =~ ("\\`" ++ regex), input =~ ("\\`" ++ regex))
