@@ -3,6 +3,7 @@ module Data.Map.Extensions where
 import Data.List as List
 import Data.Map as Map
 import Data.Maybe as Maybe
+import Debug.Trace as Trace
 import Prelude.Extensions as PreludeExt
 
 lookupIf :: Ord a => a -> (Map a b) -> (Bool, b)
@@ -45,4 +46,11 @@ memoize = \function -> let
 
 fromKeyList :: Ord k => (k -> a) -> [k] -> (Map k a)
 fromKeyList = \f keys -> (Map.fromList (List.map (\k -> (k, f k)) keys))
+
+debugLookup :: (Ord k, Show k, Show a) => (Map k a) -> k -> a
+debugLookup = \map key -> let
+    error_output = (concat ["failed to find key:\n", show key, "\n\nin map:\n", show map, "\n\n"])
+    trace_output = (ifElse (Map.member key map) "" error_output)
+    in (Trace.trace trace_output ((!) map key))
+
 
