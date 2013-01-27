@@ -25,10 +25,14 @@ isQuitEvent = \event -> case event of
     _ -> False
 
 normalizeKeyEvent = \event -> case event of
-    (KeyDown (Keysym key_id modifiers unicode)) -> (True, key_id)
-    (KeyUp (Keysym key_id modifiers unicode)) -> (False, key_id)
+    (KeyDown (Keysym key_id modifiers unicode)) -> (key_id, True)
+    (KeyUp (Keysym key_id modifiers unicode)) -> (key_id, False)
 
 normalizeKeyEvents = (List.map normalizeKeyEvent)
+
+updateKeyMap = \keymap events -> let
+    normalized = (normalizeKeyEvents (List.filter isKeyEvent events))
+    in (Map.union (Map.fromList normalized) keymap)
 
 takeEvents = do
     event <- SDL.pollEvent
