@@ -33,6 +33,18 @@ expandBounds = \aabb point -> let
     maxs = (ListExt.map2 max (V.toList (maxCorner aabb)) (V.toList point))
     in (fromMinMax (V.fromList mins) (V.fromList maxs))
 
+aabbIntersection :: AABB -> AABB -> (Bool, AABB)
+aabbIntersection = \a b -> let
+    zip = \(min, max) -> (List.zip (V.toList min) (V.toList max))
+    zipped = (List.zip (zip a) (zip b))
+    isOverlap = \((a_min, a_max), (b_min, b_max)) -> (not (or [(<) a_max b_min, (<) b_max a_min]))
+    overlap = \((a_min, a_max), (b_min, b_max)) -> (max a_min b_min, min a_max b_max)
+    intersects = (and (List.map isOverlap zipped))
+    intersection = (unzip (List.map overlap zipped))
+    in (intersects, intersection)
+
+aabbIntersects = \a b -> (fst (aabbIntersection a b))
+
 pointsBoundingBox :: [Vector] -> AABB
 pointsBoundingBox = \points -> let
     in (List.foldl expandBounds (fromMinMax (head points) (head points)) (tail points))
