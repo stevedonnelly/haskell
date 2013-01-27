@@ -1,4 +1,3 @@
-
 module Data.Set.Extensions where
 import Control.Exception.Base as Exception
 import Data.List as List
@@ -13,6 +12,9 @@ deleteMin :: Ord a => Set a -> Set a
 deleteMin = \set -> (Set.delete (Set.findMin set) set)
 deleteMax :: Ord a => Set a -> Set a
 deleteMax = \set -> (Set.delete (Set.findMax set) set)
+
+insertOrDelete :: Ord a => a -> Bool -> Set a -> Set a
+insertOrDelete = \key insert set -> ((ifElse insert Set.insert Set.delete) key set)
 
 intersections :: Ord a => [Set a] -> (Set a)
 intersections = \sets -> let

@@ -2,7 +2,8 @@ module Graphics.UI.SDL.Extensions where
 import Data.List as List
 import Data.Map as Map
 import Data.Set as Set
-import Graphics.UI.SDL as SDL
+import Data.Set.Extensions as SetExt
+import qualified Graphics.UI.SDL as SDL
 import Prelude.Extensions as PreludeExt
 
 
@@ -25,14 +26,13 @@ isQuitEvent = \event -> case event of
     _ -> False
 
 normalizeKeyEvent = \event -> case event of
-    (KeyDown (Keysym key_id modifiers unicode)) -> (key_id, True)
-    (KeyUp (Keysym key_id modifiers unicode)) -> (key_id, False)
+    (SDL.KeyDown (SDL.Keysym key_id modifiers unicode)) -> (key_id, True)
+    (SDL.KeyUp (SDL.Keysym key_id modifiers unicode)) -> (key_id, False)
 
-normalizeKeyEvents = (List.map normalizeKeyEvent)
+normalizedKeyEvents = ((.) (List.map normalizeKeyEvent) (List.filter isKeyEvent))
 
-updateKeyMap = \keymap events -> let
-    normalized = (normalizeKeyEvents (List.filter isKeyEvent events))
-    in (Map.union (Map.fromList normalized) keymap)
+updateKeySet = \keys events -> let
+    in (List.foldl (flip (uncurry SetExt.insertOrDelete)) keys (normalizedKeyEvents events))
 
 takeEvents = do
     event <- SDL.pollEvent
