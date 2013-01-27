@@ -1,6 +1,7 @@
 module Graphics.Rendering.OpenGL.Drawing where
 import Algebra.Vector as V
 import Data.List as List
+import Geometry.AABB as AABB
 import Geometry.LineSegment as LS
 import Geometry.Polygon as Polygon
 import Graphics.Rendering.OpenGL
@@ -23,6 +24,12 @@ vectorToColor3 :: Vector -> Color3 GLdouble
 vectorToColor3 = (vectorToGL3 Color3)
 vectorToVector3 :: Vector -> Vector3 GLdouble
 vectorToVector3 = (vectorToGL3 Vector3)
+
+drawAABB2d :: AABB -> IO()
+drawAABB2d = \aabb -> do
+    let ([x0, y0], [x1, y1]) = aabb
+    renderPrimitive Polygon $ do
+        (drawVertices2d [[x0, y0], [x1, y0], [x1, y1], [x0, y1]])
 
 drawPoint2d :: Vector -> IO()
 drawPoint2d = \point -> preservingMatrix $ do
