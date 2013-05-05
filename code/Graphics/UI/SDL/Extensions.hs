@@ -40,4 +40,8 @@ takeEvents = do
     remaining <- (ifElse no_events (return []) takeEvents)
     return (ifElse no_events [] ((:) event remaining))
 
+handleQuitEvent = \events -> do
+    let has_quit = (or (List.map isQuitEvent events))
+    (ifElse has_quit SDL.quit (return ()))
+
 
