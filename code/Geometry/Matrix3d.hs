@@ -4,7 +4,6 @@ rotation = \[x, y, z] angle -> let
     cosa = (toRational (cos (fromRational angle)))
     sina = (toRational (sin (fromRational angle)))
     invcosa = ((-) 1 cosa)
-    invsina = ((-) 1 sina)
     in [[(+) cosa (product [x, x, invcosa]), 
          (-) (product [x, y, invcosa]) ((*) z sina),
          (+) (product [x, z, invcosa]) ((*) y sina)],
