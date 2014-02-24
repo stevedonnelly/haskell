@@ -7,7 +7,7 @@ import Prelude.Extensions as PreludeExt
 import Text.Scanner as Scanner
 
 
-data ParseTree = Empty | Terminal IndexToken | Sequence [ParseTree] | Production Int ParseTree deriving (Show, Eq)
+data ParseTree = Empty | Terminal Token | Sequence [ParseTree] | Production Int ParseTree deriving (Show, Eq)
 
 isEmpty = \tree -> case tree of
     Empty -> True
@@ -33,7 +33,7 @@ numberOfTokens = \parse_tree -> case parse_tree of
     (Production id p) -> (numberOfTokens p)
 
 
-data ParseError = Error (IndexToken, Int) | ProductionError [[ParseError]] deriving (Show, Eq)
+data ParseError = Error (Token, Int) | ProductionError [[ParseError]] deriving (Show, Eq)
 
 isError = \error -> case error of
     (Error _) -> True
@@ -46,7 +46,7 @@ error = \(Error (token, expected)) -> (token, expected)
 productionError = \(ProductionError suberrors) -> suberrors
 
 
-type ParseFunction = [IndexToken] -> (ParseTree, [ParseError], [IndexToken])
+type ParseFunction = [Token] -> (ParseTree, [ParseError], [Token])
 
 emptyParser :: ParseFunction
 emptyParser = \tokens -> (Empty, [], tokens)
@@ -54,8 +54,8 @@ emptyParser = \tokens -> (Empty, [], tokens)
 terminalParser :: Int -> ParseFunction
 terminalParser = \token_id tokens -> let
     is_end = (List.null tokens)
-    is_match = ((==) (indexTokenId (head tokens)) token_id)
-    end_token = (-1, (-1, "\\EOF"))
+    is_match = ((==) (tokenId (head tokens)) token_id)
+    end_token = (-1, -1, "\\EOF")
     in (ifElse is_end (Empty, [Error (end_token, token_id)], [])
         (ifElse is_match (Terminal (head tokens), [], tail tokens)
             (Empty, [Error (head tokens, token_id)], tail tokens)))
@@ -87,7 +87,7 @@ listParser = \parse_function -> let
     productions = [emptyParser, general_case]
     in (productionParser productions)
 
-parse :: ParseFunction -> [IndexToken] -> (ParseTree, [ParseError])
+parse :: ParseFunction -> [Token] -> (ParseTree, [ParseError])
 parse = \parse_function tokens -> let
     (tree, errors, remaining) = (parse_function tokens)
     after_end = (List.map (\token -> Error (token, (-1))) remaining)

@@ -11,7 +11,7 @@ import Text.Regex.Posix
 
 
 type Token = (Int, Int, String)
-tokenType = first3
+tokenId = first3
 tokenPosition = second3
 tokenText = third3
 setTokenText = setThird3
@@ -27,11 +27,11 @@ scan = \patterns input -> let
         select_new = ((&&) is_match ((>) (length text) (length (snd previous))))
         in (ifElse select_new (fst rule, text) previous)
     scan = \input index -> let
-        (match_type, match_text) = (List.foldl (selectMatch input) (-1, "") rules)
+        (match_id, match_text) = (List.foldl (selectMatch input) (-1, "") rules)
         match_length = (length match_text)
         after_match = (drop match_length input)
         (remaining, next_index, tokens, errors) = (ifElse ((/=) match_length 0) 
-            (after_match, (+) index match_length, [(match_type, index, match_text)], []) 
+            (after_match, (+) index match_length, [(match_id, index, match_text)], []) 
             (tail input, (+) index 1, [], [(index, head input)]))
         (recurse_tokens, recurse_errors) = (scan remaining next_index)
         in (ifElse (List.null input) ([], []) ((++) tokens recurse_tokens, (++) errors recurse_errors))
