@@ -83,9 +83,14 @@ productionParser = \productions tokens -> let
 
 listParser :: ParseFunction -> ParseFunction
 listParser = \parse_function -> let
-    general_case = sequenceParser [parse_function, (listParser parse_function)]
-    productions = [emptyParser, general_case]
+    list_case = sequenceParser [parse_function, (listParser parse_function)]
+    productions = [emptyParser, list_case]
     in (productionParser productions)
+
+unwrapListParseTree = \tree -> let
+    (id, subtree) = (production tree)
+    [first, rest] = (sequence (subtree))
+    in (ifElse ((==) id 0) [] ((:) first (unwrapListParseTree rest)))
 
 parse :: ParseFunction -> [Token] -> (ParseTree, [ParseError])
 parse = \parse_function tokens -> let
