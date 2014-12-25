@@ -89,7 +89,7 @@ listParser = \parse_function -> let
 
 unwrapListParseTree = \tree -> let
     (id, subtree) = (production tree)
-    [first, rest] = (sequence (subtree))
+    [first, rest] = (Text.Parser.sequence subtree)
     in (ifElse ((==) id 0) [] ((:) first (unwrapListParseTree rest)))
 
 parse :: ParseFunction -> [Token] -> (ParseTree, [ParseError])
