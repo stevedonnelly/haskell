@@ -36,9 +36,11 @@ splitLessEqual = \key map -> let
     (less, equal, greater) = (Map.splitLookup key map)
     in (ifElse (isJust equal) (Map.insert key (fromJust equal) less) less, greater)
 
+mapKeysAndValues :: Ord k1 => Ord k2 => ((k1, v1) -> (k2, v2)) -> (Map.Map k1 v1) -> (Map.Map k2 v2)
 mapKeysAndValues = \transform map -> let
     in (Map.fromList (List.map transform (Map.toList map)))
 
+mapKeys :: Ord k1 => Ord k2 => (k1 -> k2) -> (Map.Map k1 v) -> (Map.Map k2 v)
 mapKeys = \transform map -> let
     pairTransform = \(k, v) -> (transform k, v)
     in (mapKeysAndValues pairTransform map)
