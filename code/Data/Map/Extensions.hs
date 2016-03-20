@@ -36,6 +36,13 @@ splitLessEqual = \key map -> let
     (less, equal, greater) = (Map.splitLookup key map)
     in (ifElse (isJust equal) (Map.insert key (fromJust equal) less) less, greater)
 
+mapKeysAndValues = \transform map -> let
+    in (Map.fromList (List.map transform (Map.toList map)))
+
+mapKeys = \transform map -> let
+    pairTransform = \(k, v) -> (transform k, v)
+    in (mapKeysAndValues pairTransform map)
+
 memoize :: Ord a => (a -> b) -> (a -> Map a b -> (b, Map a b))
 memoize = \function -> let
     memoized = \input cache -> let
