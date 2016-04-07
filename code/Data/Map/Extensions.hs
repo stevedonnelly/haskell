@@ -53,6 +53,15 @@ memoize = \function -> let
         in (ifElse is_cached (cached, cache) (output, Map.insert input output cache))
     in memoized
 
+findExtremeWithDefault :: (Map k a -> (k, a)) -> (k, a) -> Map k a -> (k, a)
+findExtremeWithDefault = \selector default map -> (ifElse (Map.null map) default (selector map)) 
+
+findMinWithDefault :: (k, a) -> Map k a -> (k, a)
+findMinWithDefault = \default map -> (findExtremeWithDefault Map.findMin)
+
+findMaxWithDefault :: (k, a) -> Map k a -> (k, a)
+findMaxWithDefault = \default map -> (findExtremeWithDefault Map.findMax)
+
 fromKeyList :: Ord k => (k -> a) -> [k] -> (Map k a)
 fromKeyList = \f keys -> (Map.fromList (List.map (\k -> (k, f k)) keys))
 
