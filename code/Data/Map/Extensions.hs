@@ -6,6 +6,10 @@ import Data.Maybe as Maybe
 import Debug.Trace as Trace
 import Prelude.Extensions as PreludeExt
 
+
+notNull :: Map a b -> Bool
+notNull = ((.) not Map.null)
+
 lookupIf :: Ord a => a -> (Map a b) -> (Bool, b)
 lookupIf = \key map -> (splitMaybe (Map.lookup key map)) 
 
