@@ -8,6 +8,7 @@ import Data.Map as Map
 import Prelude.Extensions as PreludeExt
 
 
+notNull :: [a] -> Bool
 notNull = ((.) not List.null)
 
 count :: Eq a => [a] -> a -> Int

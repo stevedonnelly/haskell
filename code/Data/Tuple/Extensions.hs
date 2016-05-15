@@ -9,6 +9,8 @@ first2 (a, b) = a
 second2 (a, b) = b
 setFirst2 (a, b) x = (x, b)
 setSecond2 (a, b) x = (a, x)
+toList2 = \(a, b) -> [a, b]
+fromList2 = \[a, b] -> (a, b)
 
 first3 (a, b, c) = a
 second3 (a, b, c) = b
@@ -16,6 +18,8 @@ third3 (a, b, c) = c
 setFirst3 (a, b, c) x = (x, b, c)
 setSecond3 (a, b, c) x = (a, x, c)
 setThird3 (a, b, c) x = (a, b, x)
+toList3 = \(a, b, c) -> [a, b, c]
+fromList3 = \[a, b, c] -> (a, b, c)
 
 first4 (a, b, c, d) = a
 second4 (a, b, c, d) = b
@@ -25,6 +29,8 @@ setFirst4 (a, b, c, d) x = (x, b, c, d)
 setSecond4 (a, b, c, d) x = (a, x, c, d)
 setThird4 (a, b, c, d) x = (a, b, x, d)
 setFourth4 (a, b, c, d) x = (a, b, c, x)
+toList4 = \(a, b, c, d) -> [a, b, c, d]
+fromList4 = \[a, b, c, d] -> (a, b, c, d)
 
 first5 (a, b, c, d, e) = a
 second5 (a, b, c, d, e) = b
@@ -36,6 +42,8 @@ setSecond5 (a, b, c, d, e) x = (a, x, c, d, e)
 setThird5 (a, b, c, d, e) x = (a, b, x, d, e)
 setFourth5 (a, b, c, d, e) x = (a, b, c, x, e)
 setFifth5 (a, b, c, d, e) x = (a, b, c, d, x)
+toList5 = \(a, b, c, d, e) -> [a, b, c, d, e]
+fromList5 = \[a, b, c, d, e] -> (a, b, c, d, e)
 
 first6 (a, b, c, d, e, f) = a
 second6 (a, b, c, d, e, f) = b
@@ -49,6 +57,8 @@ setThird6 (a, b, c, d, e, f) x = (a, b, x, d, e, f)
 setFourth6 (a, b, c, d, e, f) x = (a, b, c, x, e, f)
 setFifth6 (a, b, c, d, e, f) x = (a, b, c, d, x, f)
 setSixth6 (a, b, c, d, e, f) x = (a, b, c, d, e, x)
+toList6 = \(a, b, c, d, e, f) -> [a, b, c, d, e, f]
+fromList6 = \[a, b, c, d, e, f] -> (a, b, c, d, e, f)
 
 first7 (a, b, c, d, e, f, g) = a
 second7 (a, b, c, d, e, f, g) = b
@@ -64,6 +74,8 @@ setFourth7 (a, b, c, d, e, f, g) x = (a, b, c, x, e, f, g)
 setFifth7 (a, b, c, d, e, f, g) x = (a, b, c, d, x, f, g)
 setSixth7 (a, b, c, d, e, f, g) x = (a, b, c, d, e, x, g)
 setSeventh7 (a, b, c, d, e, f, g) x = (a, b, c, d, e, f, x)
+toList7 = \(a, b, c, d, e, f, g) -> [a, b, c, d, e, f, g]
+fromList7 = \[a, b, c, d, e, f, g] -> (a, b, c, d, e, f, g)
 
 first8 (a, b, c, d, e, f, g, h) = a
 second8 (a, b, c, d, e, f, g, h) = b
@@ -81,5 +93,7 @@ setFifth8 (a, b, c, d, e, f, g, h) x = (a, b, c, d, x, f, g, h)
 setSixth8 (a, b, c, d, e, f, g, h) x = (a, b, c, d, e, x, g, h)
 setSeventh8 (a, b, c, d, e, f, g, h) x = (a, b, c, d, e, f, x, h)
 setEighth8 (a, b, c, d, e, f, g, h) x = (a, b, c, d, e, f, g, x)
+toList8 = \(a, b, c, d, e, f, g, h) -> [a, b, c, d, e, f, g, h]
+fromList8 = \[a, b, c, d, e, f, g, h] -> (a, b, c, d, e, f, g, h)
 
 

@@ -6,6 +6,10 @@ import Data.Maybe as Maybe
 import Debug.Trace as Trace
 import Prelude.Extensions as PreludeExt
 
+
+notNull :: Map a b -> Bool
+notNull = ((.) not Map.null)
+
 lookupIf :: Ord a => a -> (Map a b) -> (Bool, b)
 lookupIf = \key map -> (splitMaybe (Map.lookup key map)) 
 
@@ -36,6 +40,15 @@ splitLessEqual = \key map -> let
     (less, equal, greater) = (Map.splitLookup key map)
     in (ifElse (isJust equal) (Map.insert key (fromJust equal) less) less, greater)
 
+mapKeysAndValues :: Ord k1 => Ord k2 => ((k1, v1) -> (k2, v2)) -> (Map.Map k1 v1) -> (Map.Map k2 v2)
+mapKeysAndValues = \transform map -> let
+    in (Map.fromList (List.map transform (Map.toList map)))
+
+mapKeys :: Ord k1 => Ord k2 => (k1 -> k2) -> (Map.Map k1 v) -> (Map.Map k2 v)
+mapKeys = \transform map -> let
+    pairTransform = \(k, v) -> (transform k, v)
+    in (mapKeysAndValues pairTransform map)
+
 memoize :: Ord a => (a -> b) -> (a -> Map a b -> (b, Map a b))
 memoize = \function -> let
     memoized = \input cache -> let
@@ -43,6 +56,15 @@ memoize = \function -> let
         output = (function input)
         in (ifElse is_cached (cached, cache) (output, Map.insert input output cache))
     in memoized
+
+findExtremeWithDefault :: Ord k => (Map k a -> (k, a)) -> (k, a) -> Map k a -> (k, a)
+findExtremeWithDefault = \selector thedefault map -> (ifElse (Map.null map) thedefault (selector map)) 
+
+findMinWithDefault :: Ord k => (k, a) -> Map k a -> (k, a)
+findMinWithDefault = (findExtremeWithDefault Map.findMin)
+
+findMaxWithDefault :: Ord k => (k, a) -> Map k a -> (k, a)
+findMaxWithDefault = (findExtremeWithDefault Map.findMax)
 
 fromKeyList :: Ord k => (k -> a) -> [k] -> (Map k a)
 fromKeyList = \f keys -> (Map.fromList (List.map (\k -> (k, f k)) keys))

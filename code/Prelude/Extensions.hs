@@ -5,6 +5,7 @@ import Data.Map as Map
 import Data.Maybe as Maybe
 import Data.Ratio as Ratio
 import Data.Set as Set
+import Debug.Trace as Trace
 import System.IO.Unsafe as Unsafe
 import System.Random as Random
 
@@ -43,4 +44,6 @@ readRational = ((.) toRational readDouble)
 
 random = \x -> (toRational ((%) (mod ((unsafePerformIO randomIO) :: Int) 999999999) 999999999))
 
+trace = Trace.trace
+notrace = \string result -> result
 
