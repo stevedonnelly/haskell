@@ -1,6 +1,7 @@
 
 module Data.Map.Extensions where
 import Data.List as List
+import Data.List.Extensions as ListExt
 import Data.Map as Map
 import Data.Maybe as Maybe
 import Debug.Trace as Trace
@@ -65,6 +66,15 @@ findMinWithDefault = (findExtremeWithDefault Map.findMin)
 
 findMaxWithDefault :: Ord k => (k, a) -> Map k a -> (k, a)
 findMaxWithDefault = (findExtremeWithDefault Map.findMax)
+
+conflicts :: Ord k => Eq a => (Map k a) -> (Map k a) -> [k]
+conflicts = \a b -> let
+    intersection = (Map.intersectionWith (++) (Map.map ListExt.singleton a) (Map.map ListExt.singleton b))
+    disagreements = (Map.filter ((.) not ListExt.allEqual) intersection)
+    in (Map.keys disagreements)
+
+hasConflicts :: Ord k => Eq a => (Map k a) -> (Map k a) -> Bool
+hasConflicts = \a b -> (ListExt.notNull (conflicts a b))
 
 fromKeyList :: Ord k => (k -> a) -> [k] -> (Map k a)
 fromKeyList = \f keys -> (Map.fromList (List.map (\k -> (k, f k)) keys))
