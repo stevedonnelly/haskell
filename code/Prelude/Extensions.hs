@@ -1,5 +1,6 @@
 
 module Prelude.Extensions where
+import Control.DeepSeq as DeepSeq
 import Data.List as List
 import Data.Map as Map
 import Data.Maybe as Maybe
@@ -34,6 +35,9 @@ cond = \conditions default_value -> let
     in (ifElse (List.null conditions) default_value (ifElse (fst current) (snd current) recurse))
 
 select2 = \p a b -> (ifElse (p a b) a b)
+
+strict :: NFData a => a -> a
+strict = \x -> (DeepSeq.deepseq x x)
 
 readInt :: String -> Int
 readInt = read
