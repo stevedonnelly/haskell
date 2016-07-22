@@ -51,3 +51,6 @@ random = \x -> (toRational ((%) (mod ((unsafePerformIO randomIO) :: Int) 9999999
 trace = Trace.trace
 notrace = \string result -> result
 
+traceIf = \condition text result -> (ifElse condition (Trace.trace text result) result)
+
+
