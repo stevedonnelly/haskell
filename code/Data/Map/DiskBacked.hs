@@ -102,6 +102,12 @@ lookup = \key map -> do
     (putLRU (final_cache, backing_file) map)
     return value
         
---delete :: Ord key => key -> LRU key val -> (LRU key val, Maybe val)
---pop :: Ord key => LRU key val -> (LRU key val, Maybe (key, val))
---size :: LRU key val -> Int
+delete :: Ord k => k -> Map k v -> IO (Map k v)
+delete = \key map -> do
+    (lru, backing_file) <- (takeLRU map)
+    let (updated, value) = (LRU.delete key lru)
+    (ifElse (isNothing value) (unsetBackingFile key map backing_file) noop)
+    (putLRU (updated, backing_file) map)
+    (return map)    
+
+
