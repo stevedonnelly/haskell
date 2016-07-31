@@ -66,6 +66,14 @@ readBackingFile = \key map handle -> do
     let (set, value_bytes) = (List.head bytes, List.tail bytes)
     return (ifElse ((==) set 1) (Just ((mapValueDeserialize map) value_bytes)) Nothing) 
 
+unsetBackingFile :: k -> (Map k v) -> Handle -> IO ()
+unsetBackingFile = \key map handle -> do
+    let position = (keyFilePosition key map)
+    (hSeek handle AbsoluteSeek position)
+    let bytes = [0] :: [Word8]
+    ptr <- (newArray bytes)
+    (hPutBuf handle ptr 1)
+
 insertWithLock :: Ord k => k -> v -> Map k v -> LRU k v -> Handle -> IO (LRU k v)
 insertWithLock = \key value map lru backing_file -> do
     let (next, dropped) = (LRU.insertInforming key value lru)
