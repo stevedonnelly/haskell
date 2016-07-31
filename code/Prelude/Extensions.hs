@@ -48,6 +48,9 @@ readRational = ((.) toRational readDouble)
 
 random = \x -> (toRational ((%) (mod ((unsafePerformIO randomIO) :: Int) 999999999) 999999999))
 
+noop :: IO ()
+noop = (return ())
+
 trace = Trace.trace
 notrace = \string result -> result
 
