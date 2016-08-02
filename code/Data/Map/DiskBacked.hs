@@ -13,13 +13,13 @@ type Map k v = (
     MVar (LRU k v, Handle),
     k -> Int,
     Int,
-    v -> [Word8],
-    [Word8] -> v)
+    (k,v) -> [Word8],
+    [Word8] -> (k,v))
 mapLRU = first5
 mapKeyIndex = second5
 mapRecordWidth = third5
-mapValueSerialize = fourth5
-mapValueDeserialize = fifth5
+mapSerialize = fourth5
+mapDeserialize = fifth5
 
 keyFilePosition :: k -> Map k v -> Integer
 keyFilePosition = \key map -> (toInteger ((*) ((mapKeyIndex map) key) (mapRecordWidth map)))
@@ -31,7 +31,7 @@ takeLRU = \map -> do
 putLRU = \lru_handle map -> do
     (putMVar (mapLRU map) lru_handle)
 
-empty :: Ord k => Int -> (k -> Int) -> Int -> (v -> [Word8]) -> ([Word8] -> v) -> String -> IO (Map k v)
+empty :: Ord k => Int -> (k -> Int) -> Int -> ((k, v) -> [Word8]) -> ([Word8] -> (k, v)) -> String -> IO (Map k v)
 empty = \size keyIndex record_width serialize deserialize path -> do
     backing_file <- (openBinaryFile path ReadWriteMode)
     lru <- (newMVar (LRU.newLRU (Just (fromIntegral size)), backing_file)) 
@@ -50,21 +50,28 @@ maxSize = \map -> do
 writeToBackingFile :: k -> v -> Map k v -> Handle -> IO ()
 writeToBackingFile = \key value map handle -> do
     let position = (keyFilePosition key map)
-    let bytes = ((:) 1 ((mapValueSerialize map) value))
+    let bytes = ((:) 1 ((mapSerialize map) (key,value)))
     (hSeek handle AbsoluteSeek position)
     ptr <- (newArray bytes)
     (hPutBuf handle ptr (mapRecordWidth map))
 
-readBackingFile :: k -> (Map k v) -> Handle -> IO (Maybe v)
+readBackingFile :: Eq k => k -> (Map k v) -> Handle -> IO (Maybe v)
 readBackingFile = \key map handle -> do
     let position = (keyFilePosition key map)
     let width = (mapRecordWidth map)
     (hSeek handle AbsoluteSeek position)
     ptr <- (mallocArray width)
-    (hGetBuf handle ptr width)
-    bytes <- (peekArray width ptr)
-    let (set, value_bytes) = (List.head bytes, List.tail bytes)
-    return (ifElse ((==) set 1) (Just ((mapValueDeserialize map) value_bytes)) Nothing) 
+    let {search = do
+        (hGetBuf handle ptr width)
+        bytes <- (peekArray width ptr)
+        let is_set = ((&&) ((==) (List.length bytes) width) ((==) (List.head bytes) 1))
+        let (disk_key, disk_value) = ((mapDeserialize map) (List.tail bytes))
+        (ifElse is_set
+            (ifElse ((==) disk_key key)
+                (return (Just disk_value))
+                search)
+            (return Nothing))}
+    search
 
 unsetBackingFile :: k -> (Map k v) -> Handle -> IO ()
 unsetBackingFile = \key map handle -> do
