@@ -54,10 +54,12 @@ readBackingFile = \key map handle -> do
     (hSeek handle AbsoluteSeek position)
     ptr <- (mallocArray width)
     let {search = do
-        (hGetBuf handle ptr width)
+        bytes_read <- (hGetBuf handle ptr width)
         bytes <- (peekArray width ptr)
-        let is_set = ((&&) ((==) (List.length bytes) width) ((==) (List.head bytes) 1))
+        let eof = ((/=) bytes_read width)
+        let is_set = ((&&) (not eof) ((==) (List.head bytes) 1))
         let (disk_key, disk_value) = ((mapDeserialize map) (List.tail bytes))
+        (ifElse eof (hSeek handle RelativeSeek (toInteger width)) (return ()))
         (ifElse is_set
             (ifElse ((==) disk_key key)
                 (return (Just disk_value))
