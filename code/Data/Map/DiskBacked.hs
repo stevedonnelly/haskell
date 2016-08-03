@@ -74,8 +74,9 @@ writeToBackingFile = \key value map handle -> do
     (hSeek handle RelativeSeek (toInteger ((-) 0 width)))
     (hPutBuf handle ptr width)
 
-unsetBackingFile :: k -> (Map k v) -> Handle -> IO ()
+unsetBackingFile :: Eq k => k -> (Map k v) -> Handle -> IO ()
 unsetBackingFile = \key map handle -> do
+    let width = (mapRecordWidth map)
     maybe_value <- (readBackingFile key map handle) 
     (hSeek handle RelativeSeek (toInteger ((-) 0 width)))
     let bytes = [0] :: [Word8]
