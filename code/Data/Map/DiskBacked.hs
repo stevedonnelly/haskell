@@ -47,14 +47,6 @@ maxSize = \map -> do
     (putLRU (lru, file) map)
     return (fromIntegral size)
 
-writeToBackingFile :: k -> v -> Map k v -> Handle -> IO ()
-writeToBackingFile = \key value map handle -> do
-    let position = (keyFilePosition key map)
-    let bytes = ((:) 1 ((mapSerialize map) (key,value)))
-    (hSeek handle AbsoluteSeek position)
-    ptr <- (newArray bytes)
-    (hPutBuf handle ptr (mapRecordWidth map))
-
 readBackingFile :: Eq k => k -> (Map k v) -> Handle -> IO (Maybe v)
 readBackingFile = \key map handle -> do
     let position = (keyFilePosition key map)
@@ -73,10 +65,19 @@ readBackingFile = \key map handle -> do
             (return Nothing))}
     search
 
+writeToBackingFile :: Eq k => k -> v -> Map k v -> Handle -> IO ()
+writeToBackingFile = \key value map handle -> do
+    let width = (mapRecordWidth map)
+    let serialized = ((:) 1 ((mapSerialize map) (key,value)))
+    ptr <- (newArray serialized)
+    maybe_value <- (readBackingFile key map handle) 
+    (hSeek handle RelativeSeek (toInteger ((-) 0 width)))
+    (hPutBuf handle ptr width)
+
 unsetBackingFile :: k -> (Map k v) -> Handle -> IO ()
 unsetBackingFile = \key map handle -> do
-    let position = (keyFilePosition key map)
-    (hSeek handle AbsoluteSeek position)
+    maybe_value <- (readBackingFile key map handle) 
+    (hSeek handle RelativeSeek (toInteger ((-) 0 width)))
     let bytes = [0] :: [Word8]
     ptr <- (newArray bytes)
     (hPutBuf handle ptr 1)
