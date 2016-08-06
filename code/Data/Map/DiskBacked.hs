@@ -38,9 +38,6 @@ empty = \size keyIndex record_width serialize deserialize path -> do
     lru <- (newMVar (LRU.newLRU (Just (fromIntegral size)), backing_file)) 
     (return (lru, keyIndex, (+) record_width 1, serialize, deserialize))
 
---fromList :: Ord key => Maybe Integer -> [(key, val)] -> IO (AtomicLRU key val)
---toList :: Ord key => AtomicLRU key val -> IO [(key, val)]
-
 maxSize :: Map k v -> IO Int
 maxSize = \map -> do
     (lru, file) <- (takeLRU map)
@@ -48,65 +45,35 @@ maxSize = \map -> do
     (putLRU (lru, file) map)
     (return (fromIntegral size))
 
-isNextBlank :: Handle -> IO Bool
-isNextBlank = \handle -> do
-    ptr <- (mallocArray 1)
-    bytes_read <- (hGetBuf handle ptr 1)
-    bytes <- (peekArray 1 ptr) :: IO [Word8]
-    let eof = ((/=) bytes_read 1)
-    let flag = (ifElse eof 0 (List.head bytes))
-    (ifElse eof (return ()) (hSeek handle RelativeSeek (-1)))
-    (return ((==) flag 0))
-
-readBackingFile :: Eq k => k -> (Map k v) -> Handle -> IO (Maybe v, Maybe Integer)
+readBackingFile :: Eq k => k -> (Map k v) -> Handle -> IO (Maybe v)
 readBackingFile = \key map handle -> do
     let position = (keyFilePosition key map)
     let width = (mapRecordWidth map)
     (hSeek handle AbsoluteSeek position)
     ptr <- (mallocArray width)
-    let {search = \found_blank -> do
-        current_position <- (hTell handle) 
-        bytes_read <- (hGetBuf handle ptr width)
-        bytes <- (peekArray width ptr)
-        let eof = ((/=) bytes_read width)
-        let flag = (ifElse eof 0 (List.head bytes))
-        let next_found_blank = (orElse found_blank (ifElse ((==) flag 2) (Just current_position) Nothing))
-        let (disk_key, disk_value) = ((mapDeserialize map) (List.tail bytes))
-        (ifElse eof (hSeek handle RelativeSeek (toInteger width)) (return ()))
-        (ifElse ((==) flag 1)
-            (ifElse ((==) disk_key key)
-                (return (Just disk_value, next_found_blank))
-                (search next_found_blank))
-            (ifElse ((==) flag 2)
-                (search next_found_blank)
-                (return (Nothing, next_found_blank))))}
-    (search Nothing)
+    bytes_read <- (hGetBuf handle ptr width)
+    bytes <- (peekArray width ptr)
+    let eof = ((/=) bytes_read width)
+    let flag = (ifElse eof 0 (List.head bytes))
+    let (disk_key, disk_value) = ((mapDeserialize map) (List.tail bytes))
+    (return (ifElse ((==) flag 1) (Just disk_value) Nothing))
 
 writeToBackingFile :: Eq k => k -> v -> Map k v -> Handle -> IO ()
 writeToBackingFile = \key value map handle -> do
+    let position = (keyFilePosition key map)
     let width = (mapRecordWidth map)
     let serialized = ((:) 1 ((mapSerialize map) (key,value)))
     ptr <- (newArray serialized)
-    (maybe_value, maybe_blank) <- (readBackingFile key map handle)
-    let rewind = (hSeek handle RelativeSeek (toInteger ((-) 0 width))) 
-    (ifElse (isJust maybe_value)
-        rewind
-        (ifElse (isJust maybe_blank)
-            (hSeek handle AbsoluteSeek (fromJust maybe_blank))
-            rewind))
+    (hSeek handle AbsoluteSeek position) 
     (hPutBuf handle ptr width)
 
 unsetBackingFile :: Eq k => k -> (Map k v) -> Handle -> IO ()
 unsetBackingFile = \key map handle -> do
-    let width = (mapRecordWidth map)
-    (maybe_value, _) <- (readBackingFile key map handle) 
-    let {unset = do
-        is_next_blank <- (isNextBlank handle)
-        let bytes = [ifElse is_next_blank 0 2] :: [Word8]
-        ptr <- (newArray bytes)
-        (hSeek handle RelativeSeek (toInteger ((-) 0 width)))
-        (hPutBuf handle ptr 1)}
-    (ifElse (isJust maybe_value) unset (return ()))
+    let position = (keyFilePosition key map)
+    let bytes = [0] :: [Word8]
+    ptr <- (newArray bytes)
+    (hSeek handle AbsoluteSeek position) 
+    (hPutBuf handle ptr 1)
 
 insertWithLock :: Ord k => k -> v -> Map k v -> LRU k v -> Handle -> IO (LRU k v)
 insertWithLock = \key value map lru backing_file -> do
@@ -128,10 +95,10 @@ lookup = \key map -> do
     (lru, backing_file) <- (takeLRU map)
     let (updated, cached) = (LRU.lookup key lru)
     let {from_file = do
-        (file_value, _) <- (readBackingFile key map backing_file)
+        file_value <- (readBackingFile key map backing_file)
         let refresh = (insertWithLock key (fromJust file_value) map updated backing_file)
         refreshed <- (ifElse (isJust file_value) refresh (return updated))
-        return (refreshed, file_value)}
+        (return (refreshed, file_value))}
     (final_cache, value) <- (ifElse (isJust cached) (return (updated, cached)) from_file)
     (putLRU (final_cache, backing_file) map)
     (return value)
