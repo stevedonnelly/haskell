@@ -83,32 +83,49 @@ insertWithLock = \key value map lru backing_file -> do
     (ifElse (isJust dropped) write noop)
     (return next)
 
-insert :: Ord k => k -> v -> Map k v -> IO (Map k v)
+insert :: Ord k => k -> v -> Map k v -> IO ()
 insert = \key value map -> do
     (lru, backing_file) <- (takeLRU map)
     updated_lru <- (insertWithLock key value map lru backing_file)
     (putLRU (updated_lru, backing_file) map)
-    (return map)
-     
-lookup :: Ord k => k -> Map k v -> IO (Maybe v)
-lookup = \key map -> do
+
+insertToDisk :: Ord k => k -> v -> Map k v -> IO ()
+insertToDisk = \key value map -> do
     (lru, backing_file) <- (takeLRU map)
+    (writeToBackingFile key value map backing_file)
+    (putLRU (lru, backing_file) map)
+
+insertIfAbsent :: Ord k => k -> v -> Map k v -> IO (Maybe v)
+insertIfAbsent = \key value map -> do
+    (lru, backing_file) <- (takeLRU map)
+    (updated_lru, previous_value) <- (lookupWithLock key map lru backing_file)
+    let insertion = (insertWithLock key value map updated_lru backing_file)
+    final_lru <- (ifElse (isNothing previous_value) insertion (return updated_lru))
+    (putLRU (final_lru, backing_file) map)
+    (return previous_value)
+
+lookupWithLock :: Ord k => k -> Map k v -> (LRU k v) -> Handle -> IO (LRU k v, Maybe v)
+lookupWithLock = \key map lru backing_file -> do
     let (updated, cached) = (LRU.lookup key lru)
     let {from_file = do
         file_value <- (readBackingFile key map backing_file)
         let refresh = (insertWithLock key (fromJust file_value) map updated backing_file)
         refreshed <- (ifElse (isJust file_value) refresh (return updated))
         (return (refreshed, file_value))}
-    (final_cache, value) <- (ifElse (isJust cached) (return (updated, cached)) from_file)
-    (putLRU (final_cache, backing_file) map)
+    (ifElse (isJust cached) (return (updated, cached)) from_file)
+    
+lookup :: Ord k => k -> Map k v -> IO (Maybe v)
+lookup = \key map -> do
+    (lru, backing_file) <- (takeLRU map)
+    (updated, value) <- (lookupWithLock key map lru backing_file) 
+    (putLRU (updated, backing_file) map)
     (return value)
         
-delete :: Ord k => k -> Map k v -> IO (Map k v)
+delete :: Ord k => k -> Map k v -> IO ()
 delete = \key map -> do
     (lru, backing_file) <- (takeLRU map)
     let (updated, value) = (LRU.delete key lru)
     (ifElse (isNothing value) (unsetBackingFile key map backing_file) noop)
     (putLRU (updated, backing_file) map)
-    (return map)    
 
 
