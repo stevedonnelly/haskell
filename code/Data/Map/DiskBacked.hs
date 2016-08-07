@@ -63,9 +63,8 @@ unsetPreviousPosition = \map handle -> do
     ptr <- (newArray bytes)
     (hSeek handle RelativeSeek (toInteger ((-) 0 width)))
     (hPutBuf handle ptr 1)
-    (ifElse (isJust maybe_value) unset (return ()))
 
-readBackingFile :: Eq k => Boolean -> k -> (Map k v) -> Handle -> IO (Maybe v, Maybe Integer)
+readBackingFile :: Eq k => k -> (Map k v) -> Handle -> IO (Maybe v, Maybe Integer)
 readBackingFile = \key map handle -> do
     let position = (keyFilePosition key map)
     let width = (mapRecordWidth map)
@@ -77,10 +76,10 @@ readBackingFile = \key map handle -> do
         bytes <- (peekArray width ptr)
         let eof = ((/=) bytes_read width)
         let flag = (ifElse eof 0 (List.head bytes))
-        let updated_blank = (orElse blank (ifElse (List.member flag [0, 2]) (Just current_position) Nothing))
+        let updated_blank = (orElse blank (ifElse (List.elem flag [0, 2]) (Just current_position) Nothing))
         let (disk_key, disk_value) = ((mapDeserialize map) (List.tail bytes))
         let found_key = ((&&) ((==) flag 1) ((==) disk_key key))
-        (ifElse eof (hSeek handle RelativeSeek width) (return ()))
+        (ifElse eof (hSeek handle RelativeSeek (toInteger width)) (return ()))
         (ifElse found_key
             (return (Just disk_value, updated_blank))
             (ifElse ((==) flag 0)
