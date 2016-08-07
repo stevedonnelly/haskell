@@ -128,7 +128,6 @@ insertIfAbsent = \key value map -> do
 
 lookupWithLock :: Ord k => k -> Map k v -> LRU k v -> Handle -> IO (LRU k v, Maybe v)
 lookupWithLock = \key map lru backing_file -> do
-    (lru, backing_file) <- (takeLRU map)
     let (updated, cached) = (LRU.lookup key lru)
     let {from_file = do
         (file_value, _) <- (readBackingFile key map backing_file)
