@@ -1,29 +1,27 @@
 module Data.Word.Extensions where
+import Data.Digits as Digits
 import Data.List as List
 import Data.Word as Word
 import Prelude.Extensions as PreludeExt
 import Unsafe.Coerce as Coerce
 
-fromIntIterations :: Integral a => Int -> a -> [Word8]
-fromIntIterations = \iterations int -> let
-    fromNumIterationsRecursive = \iterations int -> let
-        byte = (unsafeCoerce (mod int 256)) :: Word8
-        remaining = (div int 256)
-        recurse = (fromNumIterationsRecursive ((-) iterations 1) remaining)
-        in (ifElse ((==) iterations 0) [] ((:) byte recurse))
-    in (List.reverse (fromNumIterationsRecursive iterations int))
+padList = \value length list -> let
+    pad_length = ((-) length (List.length list))
+    in (ifElse ((>) pad_length 0)
+        ((++) (List.replicate pad_length value) list)
+        (List.drop (abs pad_length) list)) 
 
-fromIntUntil :: Integral a => a -> [Word8]
-fromIntUntil = \int -> let
-    fromIntUntilRecursive = \int -> let
-        byte = (unsafeCoerce (mod int 256)) :: Word8
-        remaining = (div int 256)
-        recurse = (fromIntUntilRecursive remaining)
-        in (ifElse ((==) int 0) [] ((:) byte recurse))
-    in (List.reverse (fromIntUntilRecursive int))
+fromInt :: Integral a => Int -> a -> [Word8]
+fromInt = \bytes n -> (List.map unsafeCoerce (padList 0 bytes (Digits.digits 256 n)))
 
 fromInt32 :: Int -> [Word8]
-fromInt32 = (fromIntIterations 4)
+fromInt32 = (fromInt 4)
 
-fromInt64 = (fromIntIterations 8)
+fromInt64 :: Int -> [Word8]
+fromInt64 = (fromInt 8)
 
+fromInteger :: Integer -> [Word8]
+fromInteger = ((.) (List.map unsafeCoerce) (Digits.digits 256))
+
+toIntegral :: Integral a => [Word8] -> a
+toIntegral = ((.) (Digits.unDigits 256) (List.map unsafeCoerce))
