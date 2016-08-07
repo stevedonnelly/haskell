@@ -1,7 +1,6 @@
 module Data.Map.DiskBacked where
 import Control.Concurrent.MVar as MVar
 import Data.Cache.LRU as LRU
-import Data.Generics.Aliases as Generics
 import Data.List as List
 import Data.Maybe as Maybe
 import Data.Tuple.Extensions as TupleExt

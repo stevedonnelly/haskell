@@ -1,11 +1,13 @@
-module Control.Concurrent.Extensions
+module Control.Concurrent.Extensions where
 import Control.Concurrent as Concurrent
 import Control.Concurrent.MVar as MVar
+import Control.Exception.Base
 
-forkFuture :: IO a -> (ThreadId, MVar (Either SomeException a))
+
+forkFuture :: IO a -> IO (ThreadId, MVar (Either SomeException a))
 forkFuture = \io -> do
     future <- newEmptyMVar
-    let complete = \exception_or_result -> (putMVar exception_or_result)
+    let complete = \exception_or_result -> do (putMVar future exception_or_result)
     thread_id <- (forkFinally io complete)
     (return (thread_id, future))
 
