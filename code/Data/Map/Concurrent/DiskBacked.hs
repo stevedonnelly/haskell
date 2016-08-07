@@ -32,9 +32,6 @@ insertWith = \dmInsert key value map -> do
 insert :: Ord k => k -> v -> Map k v -> IO ()
 insert = (insertWith DataMap.insert)
 
-insertToDisk :: Ord k => k -> v -> Map k v -> IO ()
-insertToDisk = (insertWith DataMap.insertToDisk)
-
 insertIfAbsent :: Ord k => k -> v -> Map k v -> IO (Maybe v)
 insertIfAbsent = (insertWith DataMap.insertIfAbsent)  
      
