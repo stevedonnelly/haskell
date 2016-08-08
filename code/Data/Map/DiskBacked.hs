@@ -153,4 +153,23 @@ delete = \key map -> do
     (ifElse (isNothing value) (unsetBackingFile key map backing_file) noop)
     (putLRU (updated, backing_file) map)
 
+parseBackingFile :: Ord k => Show k => Show v => Int -> ([Word8] -> (k, v)) -> Handle -> IO [(Word8, k, v)]
+parseBackingFile = \width deserialize handle -> do
+    let flag_width = ((+) width 1) :: Int
+    ptr <- (mallocArray flag_width)
+    let {parseNext = do
+        (hGetBuf handle ptr flag_width)
+        bytes <- (peekArray flag_width ptr) :: IO [Word8]
+        let flag = (List.head bytes)
+        let (key, value) = (deserialize (List.tail bytes))
+        (return (flag, key, value))}
+    let {parseAll = \records -> do
+        eof <- (hIsEOF handle)
+        let {recurse = do
+            record <- (parseNext)
+            (parseAll ((:) record records))}
+        (ifElse eof (return records) recurse)}
+    records <- (parseAll [])
+    (return (List.reverse records))
+
 
