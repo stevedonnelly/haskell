@@ -68,6 +68,15 @@ splitOn = \value list -> let
     (current, lists) = (List.foldr splitter ([], []) list)
     in ((:) current lists)
 
+groupBySize :: Int -> [a] -> [[a]]
+groupBySize = \size list -> let
+    condition = \(groups, remaining) -> (notNull remaining)
+    transform = \(groups, remaining) -> let
+        (group, next_remaining) = (splitAt size remaining)
+        in ((:) group groups, next_remaining)
+    (groups, _) = (while condition transform ([], list))
+    in (List.reverse (List.dropWhile List.null groups))
+
 allEqual :: Eq a => [a] -> Bool
 allEqual = \list -> ((||) (List.null list) (List.all ((==) (head list)) (tail list)))
 
