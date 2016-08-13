@@ -1,4 +1,5 @@
 module Data.Map.DiskBacked where
+import Control.Applicative
 import Control.Concurrent.MVar as MVar
 import qualified Data.Cache.LRU as LRU
 import Data.Generics.Aliases as Generics
@@ -147,9 +148,10 @@ lookup = \key map -> do
     (return value)
 
 (!) :: Ord k => k -> Map k v -> IO v
-(!) = \key map -> do
-    value <- (Data.Map.DiskBacked.lookup key map)
-    (return (fromJust value))
+(!) = \k m -> ((liftA fromJust) (Data.Map.DiskBacked.lookup k m))
+
+lookupIf :: Ord k => k -> Map k v -> IO (Bool, v)
+lookupIf = \k m -> ((liftA splitMaybe) (Data.Map.DiskBacked.lookup k m))  
   
 delete :: Ord k => k -> Map k v -> IO ()
 delete = \key map -> do

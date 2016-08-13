@@ -1,4 +1,5 @@
 module Data.Map.Concurrent.DiskBacked where
+import Control.Applicative
 import Data.List as List
 import Data.List.Extensions as ListExt
 import qualified Data.Map as ShardMap
@@ -6,6 +7,7 @@ import qualified Data.Map.DiskBacked as DataMap
 import Data.Maybe as Maybe
 import Data.Tuple.Extensions as TupleExt
 import Data.Word as Word
+import Prelude.Extensions as PreludeExt
 
 type (Map k v) = (
     ShardMap.Map Int (DataMap.Map k v),
@@ -43,9 +45,10 @@ lookup = \key map -> do
     (DataMap.lookup key shard)
 
 (!) :: Ord k => k -> Map k v -> IO v
-(!) = \key map -> do
-    value <- (Data.Map.Concurrent.DiskBacked.lookup key map)
-    (return (fromJust value))
+(!) = \k m -> ((liftA fromJust) (Data.Map.Concurrent.DiskBacked.lookup k m))
+
+lookupIf :: Ord k => k -> Map k v -> IO (Bool, v)
+lookupIf = \k m -> ((liftA splitMaybe) (Data.Map.Concurrent.DiskBacked.lookup k m)) 
 
 delete :: Ord k => k -> Map k v -> IO ()
 delete = \key map -> do
