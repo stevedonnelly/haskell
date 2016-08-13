@@ -1,8 +1,8 @@
 module Data.Map.DiskBacked where
 import Control.Concurrent.MVar as MVar
-import Data.Cache.LRU as LRU
+import qualified Data.Cache.LRU as LRU
 import Data.Generics.Aliases as Generics
-import Data.List as List
+import qualified Data.List as List
 import Data.Maybe as Maybe
 import Data.Tuple.Extensions as TupleExt
 import Data.Word as Word
@@ -11,7 +11,7 @@ import Prelude.Extensions as PreludeExt
 import System.IO as SysIO
 
 type Map k v = (
-    MVar (LRU k v, Handle),
+    MVar (LRU.LRU k v, Handle),
     k -> Int,
     Int,
     (k,v) -> [Word8],
@@ -103,7 +103,7 @@ unsetBackingFile = \key map handle -> do
     (value, _) <- (readBackingFile key map handle)
     (ifElse (isJust value) (unsetPreviousPosition map handle) (return ()))
 
-insertWithLock :: Ord k => k -> v -> Map k v -> LRU k v -> Handle -> IO (LRU k v)
+insertWithLock :: Ord k => k -> v -> Map k v -> LRU.LRU k v -> Handle -> IO (LRU.LRU k v)
 insertWithLock = \key value map lru backing_file -> do
     let (next, dropped) = (LRU.insertInforming key value lru)
     let (drop_key, drop_value) = (fromJust dropped)
@@ -126,7 +126,7 @@ insertIfAbsent = \key value map -> do
     (putLRU (final_lru, backing_file) map)
     (return previous_value)
 
-lookupWithLock :: Ord k => k -> Map k v -> LRU k v -> Handle -> IO (LRU k v, Maybe v)
+lookupWithLock :: Ord k => k -> Map k v -> LRU.LRU k v -> Handle -> IO (LRU.LRU k v, Maybe v)
 lookupWithLock = \key map lru backing_file -> do
     let (updated, cached) = (LRU.lookup key lru)
     let {from_file = do
@@ -145,7 +145,12 @@ lookup = \key map -> do
     (final_cache, value) <- (lookupWithLock key map lru backing_file)
     (putLRU (final_cache, backing_file) map)
     (return value)
-        
+
+(!) :: Ord k => k -> Map k v -> IO v
+(!) = \key map -> do
+    value <- (Data.Map.DiskBacked.lookup key map)
+    (return (fromJust value))
+  
 delete :: Ord k => k -> Map k v -> IO ()
 delete = \key map -> do
     (lru, backing_file) <- (takeLRU map)

@@ -3,6 +3,7 @@ import Data.List as List
 import Data.List.Extensions as ListExt
 import qualified Data.Map as ShardMap
 import qualified Data.Map.DiskBacked as DataMap
+import Data.Maybe as Maybe
 import Data.Tuple.Extensions as TupleExt
 import Data.Word as Word
 
@@ -40,7 +41,12 @@ lookup :: Ord k => k -> Map k v -> IO (Maybe v)
 lookup = \key map -> do
     let shard = (selectShardMap map key)
     (DataMap.lookup key shard)
-        
+
+(!) :: Ord k => k -> Map k v -> IO v
+(!) = \key map -> do
+    value <- (Data.Map.Concurrent.DiskBacked.lookup key map)
+    (return (fromJust value))
+
 delete :: Ord k => k -> Map k v -> IO ()
 delete = \key map -> do
     let shard = (selectShardMap map key)
