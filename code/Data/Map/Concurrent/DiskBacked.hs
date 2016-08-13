@@ -16,12 +16,13 @@ selectShardMap :: Ord k => (Map k v) -> k -> (DataMap.Map k v)
 selectShardMap = \map key -> ((ShardMap.!) (mapShardMap map) ((mapShardFunction map) key))
 
 empty :: Ord k => Int -> Int -> (k -> Int) -> Int -> ((k, v) -> [Word8]) -> ([Word8] -> (k, v)) -> String -> IO (Map k v)
-empty = \shards size keyIndex record_width serialize deserialize base_path -> do
+empty = \shards lru_size keyIndex record_width serialize deserialize base_path -> do
+    let per_shard_lru_size = (div lru_size shards)
     let shardFunction = (\key -> (mod (keyIndex key) shards))
     let adjustedKeyFunction = (\key -> (div (keyIndex key) shards))
     let shard_ids = (ListExt.range0 shards)
     let paths = (List.map (\id -> (concat [base_path, "-", show id])) shard_ids)
-    data_maps <- (mapM (DataMap.empty size adjustedKeyFunction record_width serialize deserialize) paths)
+    data_maps <- (mapM (DataMap.empty per_shard_lru_size adjustedKeyFunction record_width serialize deserialize) paths)
     (return (ShardMap.fromList (zip shard_ids data_maps), shardFunction))
 
 insertWith :: Ord k => (k -> v -> DataMap.Map k v -> IO a) -> k -> v -> Map k v -> IO a
