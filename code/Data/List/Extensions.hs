@@ -68,6 +68,21 @@ splitOn = \value list -> let
     (current, lists) = (List.foldr splitter ([], []) list)
     in ((:) current lists)
 
+splitBetweenWith :: (a -> a -> Bool) -> [a] -> [[a]]
+splitBetweenWith = \splitter list -> let
+    pairs = (List.zip ((:) undefined list) list)
+    condition = \(groups, remaining) -> (List.null remaining)
+    transform = \(groups, remaining) -> let
+        (first, rest) = (List.head remaining, List.tail remaining)
+        (group_pairs, next_remaining) = (List.span (\(previous, next) -> (not (splitter previous next))) rest)
+        next_group = (List.map snd ((:) first group_pairs))
+        in ((:) next_group groups, next_remaining)
+    (groups, _) = (until condition transform ([], pairs))
+    in (List.reverse groups)
+
+splitBetween :: Eq a => a -> a -> [a] -> [[a]]
+splitBetween = \a b -> (splitBetweenWith (\c d -> ((&&) ((==) a c) ((==) b d))))
+
 groupBySize :: Int -> [a] -> [[a]]
 groupBySize = \size list -> let
     condition = \(groups, remaining) -> (notNull remaining)
