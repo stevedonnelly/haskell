@@ -1,6 +1,7 @@
 
 module Prelude.Extensions where
 import Control.DeepSeq as DeepSeq
+import Control.Monad
 import Data.List as List
 import Data.Map as Map
 import Data.Maybe as Maybe
@@ -50,6 +51,12 @@ random = \x -> (toRational ((%) (mod ((unsafePerformIO randomIO) :: Int) 9999999
 
 noop :: IO ()
 noop = (return ())
+
+doIfElse :: Bool -> IO a -> a -> IO a
+doIfElse = \bool io otherwise -> (ifElse bool io (return otherwise))
+
+doIf :: Bool -> IO a -> IO ()
+doIf = \bool io -> (doIfElse bool (void io) ())
 
 trace = Trace.trace
 notrace = \string result -> result
