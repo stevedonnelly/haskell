@@ -44,8 +44,8 @@ lookup = \key map -> do
     let shard = (selectShardMap map key)
     (DataMap.lookup key shard)
 
-(!) :: Ord k => k -> Map k v -> IO v
-(!) = \k m -> ((liftA fromJust) (Data.Map.Concurrent.DiskBacked.lookup k m))
+(!) :: Ord k => Map k v -> k -> IO v
+(!) = \m k -> ((liftA fromJust) (Data.Map.Concurrent.DiskBacked.lookup k m))
 
 lookupIf :: Ord k => k -> Map k v -> IO (Bool, v)
 lookupIf = \k m -> ((liftA splitMaybe) (Data.Map.Concurrent.DiskBacked.lookup k m)) 

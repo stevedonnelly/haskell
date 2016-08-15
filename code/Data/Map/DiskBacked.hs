@@ -147,8 +147,8 @@ lookup = \key map -> do
     (putLRU (final_cache, backing_file) map)
     (return value)
 
-(!) :: Ord k => k -> Map k v -> IO v
-(!) = \k m -> ((liftA fromJust) (Data.Map.DiskBacked.lookup k m))
+(!) :: Ord k => Map k v -> k -> IO v
+(!) = \m k -> ((liftA fromJust) (Data.Map.DiskBacked.lookup k m))
 
 lookupIf :: Ord k => k -> Map k v -> IO (Bool, v)
 lookupIf = \k m -> ((liftA splitMaybe) (Data.Map.DiskBacked.lookup k m))  
