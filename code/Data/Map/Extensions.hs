@@ -14,6 +14,11 @@ notNull = ((.) not Map.null)
 lookupIf :: Ord a => a -> (Map a b) -> (Bool, b)
 lookupIf = \key map -> (splitMaybe (Map.lookup key map)) 
 
+insertIfAbsent :: Ord a => a -> b -> (Map a b) -> (Maybe b, Map a b)
+insertIfAbsent = \key value map -> let
+    result = (Map.lookup key map)
+    in (result, ifElse (isJust result) map (Map.insert key value map))
+
 inverse :: Ord a => Ord b => (Map a b) -> (Map b [a])
 inverse = \map -> let
     swap = \(a, b) -> (b, [a])
