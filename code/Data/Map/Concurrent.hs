@@ -40,6 +40,9 @@ lookup = \key map -> do
     (RWLock.releaseRead lock)
     (return result)
 
+(!) :: Ord k => (Map k v) -> k -> IO v
+(!) = \map key -> (liftA fromJust (lookup key map))
+
 lookupIf :: Ord k => k -> (Map k v) -> IO (Bool, v)
 lookupIf = \key map -> (liftA splitMaybe (lookup key map))
 
