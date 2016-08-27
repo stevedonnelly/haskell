@@ -11,4 +11,11 @@ forkFuture = \io -> do
     thread_id <- (forkFinally io complete)
     (return (thread_id, future))
 
+nonForkedFuture :: IO a -> IO (ThreadId, MVar (Either SomeException a))
+nonForkedFuture = \io -> do
+    id <- myThreadId
+    result <- io
+    future <- (newMVar (Right result))
+    (return (id, future))
+
 

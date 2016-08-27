@@ -13,4 +13,7 @@ getAndAdd = \mvar change -> ((liftA fst) (transformMVar mvar ((+) change)))
 getAndIncrement :: Integral a => MVar a -> IO a
 getAndIncrement = (flip getAndAdd 1)
 
+getAndDecrement :: Integral a => MVar a -> IO a
+getAndDecrement = (flip getAndAdd (-1))
+
 
