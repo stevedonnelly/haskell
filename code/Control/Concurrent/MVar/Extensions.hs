@@ -16,4 +16,13 @@ getAndIncrement = (flip getAndAdd 1)
 getAndDecrement :: Integral a => MVar a -> IO a
 getAndDecrement = (flip getAndAdd (-1))
 
+addAndGet :: Integral a => MVar a -> a -> IO a
+addAndGet = \mvar change -> ((liftA snd) (transformMVar mvar ((+) change)))
+
+incrementAndGet :: Integral a => MVar a -> IO a
+incrementAndGet = (flip getAndAdd 1)
+
+decrementAndGet :: Integral a => MVar a -> IO a
+decrementAndGet = (flip getAndAdd (-1))
+
 
