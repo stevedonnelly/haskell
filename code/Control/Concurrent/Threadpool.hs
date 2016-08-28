@@ -5,14 +5,14 @@ import Data.List as List
 import Data.Maybe as Maybe
 import Prelude.Extensions as PreludeExt
 
-type Threadpool = [(MVar (MVar (IO ())))]
+type Threadpool = [(ThreadId, MVar (MVar (IO ())))]
 
-createThreadpool :: Int -> IO ([ThreadId], Threadpool)
+createThreadpool :: Int -> IO Threadpool
 createThreadpool = \number_of_threads -> do
     let work_lock = MVar.newEmptyMVar
-    threadpool <- (mapM id (replicate number_of_threads work_lock))
-    thread_ids <- (mapM ((.) forkIO workerThread) threadpool)
-    (return (thread_ids, threadpool))
+    work_locks <- (mapM id (replicate number_of_threads work_lock))
+    thread_ids <- (mapM ((.) forkIO workerThread) work_locks)
+    (return (zip thread_ids work_locks))
 
 workerThread :: (MVar (MVar (IO ()))) -> IO ()
 workerThread = \work_lock -> do
@@ -25,7 +25,7 @@ workerThread = \work_lock -> do
 submitTask :: Threadpool -> IO () -> IO Bool
 submitTask = \threadpool task -> do
     let {submit_first = do
-        let work_lock = (List.head threadpool)
+        let (thread_id, work_lock) = (List.head threadpool)
         work_holder <- (MVar.tryTakeMVar work_lock)
         let {available = do
             (MVar.putMVar (fromJust work_holder) task)
