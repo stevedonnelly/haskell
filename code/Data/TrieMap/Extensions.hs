@@ -40,6 +40,20 @@ member = \key trie -> let
 lookup :: Ord k => [k] -> (TrieMap k a) -> a
 lookup = \key trie -> (snd (nodeValue (traverse key trie)))
 
+findExtreme :: Ord k => (Map.Map k (TrieMap k a) -> (k, TrieMap k a)) -> (TrieMap k a) -> ([k], a)
+findExtreme = \finder trie -> let
+    ((is_value, value), tree) = (nodeValue trie, nodeMap trie)
+    (extreme_key, extreme_subtrie) = (finder tree)
+    (recurse_key, recurse_value) = (findExtreme finder extreme_subtrie)
+    recurse_result = ((:) extreme_key recurse_key, recurse_value)
+    in (ifElse (Map.null tree) ([], value) recurse_result)
+
+findMin :: Ord k => TrieMap k a -> ([k], a)
+findMin = (findExtreme Map.findMin)
+
+findMax :: Ord k => TrieMap k a -> ([k], a)
+findMax = (findExtreme Map.findMax)
+
 delete :: Ord k => [k] -> (TrieMap k a) -> (TrieMap k a)
 delete = \keys trie -> let
     (key, tree) = (head keys, nodeMap trie)
