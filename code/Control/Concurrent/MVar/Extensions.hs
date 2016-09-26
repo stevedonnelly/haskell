@@ -4,7 +4,7 @@ import Control.Concurrent.MVar as MVar
 import Control.Monad
 import Prelude.Extensions as PreludeExt
 
-type Lease = (MVar Int, MVar ())
+type Latch = (MVar Int, MVar ())
 
 transformMVar :: MVar a -> (a -> a) -> IO (a, a)
 transformMVar = \mvar transform -> do
@@ -29,19 +29,19 @@ incrementAndGet = (flip addAndGet 1)
 decrementAndGet :: Integral a => MVar a -> IO a
 decrementAndGet = (flip addAndGet (-1))
 
-createLease :: Int -> IO Lease
-createLease = \leases -> do
+createLatch :: Int -> IO Latch
+createLatch = \leases -> do
     counter <- (MVar.newMVar leases)
     latch <- (ifElse ((>) leases 0) (MVar.newMVar ()) (MVar.newEmptyMVar))
     (return (counter, latch)) 
 
-takeLease :: Lease -> IO ()
+takeLease :: Latch -> IO ()
 takeLease = \(counter, latch) -> do
     (MVar.takeMVar latch)
     remaining <- (decrementAndGet counter)
     (doIf ((>) remaining 0) (MVar.tryPutMVar latch ()))
 
-putLease :: Lease -> IO ()
+putLease :: Latch -> IO ()
 putLease = \(counter, latch) -> do
     (incrementAndGet counter)
     (void (MVar.tryPutMVar latch ()))
