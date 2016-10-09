@@ -15,6 +15,8 @@ newSemaphore = \leases -> do
     signal <- (ifElse ((>) leases 0) (MVar.newMVar ()) (MVar.newEmptyMVar))
     (return (counter, lock, signal)) 
 
+currentLeases = \(counter, lock, signal) -> (MVar.readMVar counter)
+
 -- takes will complete in FIFO order whether or not there are enough leases 
 -- available for a smaller to take to complete ahead of a larger one
 takeLeases :: Semaphore -> Int -> IO ()
