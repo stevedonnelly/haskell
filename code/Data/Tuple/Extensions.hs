@@ -11,6 +11,7 @@ setFirst2 (a, b) x = (x, b)
 setSecond2 (a, b) x = (a, x)
 toList2 = \(a, b) -> [a, b]
 fromList2 = \[a, b] -> (a, b)
+getters2 = (first2, second2)
 
 first3 (a, b, c) = a
 second3 (a, b, c) = b
@@ -20,6 +21,7 @@ setSecond3 (a, b, c) x = (a, x, c)
 setThird3 (a, b, c) x = (a, b, x)
 toList3 = \(a, b, c) -> [a, b, c]
 fromList3 = \[a, b, c] -> (a, b, c)
+getters3 = (first3, second3, third3)
 
 first4 (a, b, c, d) = a
 second4 (a, b, c, d) = b
@@ -31,6 +33,7 @@ setThird4 (a, b, c, d) x = (a, b, x, d)
 setFourth4 (a, b, c, d) x = (a, b, c, x)
 toList4 = \(a, b, c, d) -> [a, b, c, d]
 fromList4 = \[a, b, c, d] -> (a, b, c, d)
+getters4 = (first4, second4, third4, fourth4)
 
 first5 (a, b, c, d, e) = a
 second5 (a, b, c, d, e) = b
@@ -44,6 +47,7 @@ setFourth5 (a, b, c, d, e) x = (a, b, c, x, e)
 setFifth5 (a, b, c, d, e) x = (a, b, c, d, x)
 toList5 = \(a, b, c, d, e) -> [a, b, c, d, e]
 fromList5 = \[a, b, c, d, e] -> (a, b, c, d, e)
+getters5 = (first5, second5, third5, fourth4, fifth5)
 
 first6 (a, b, c, d, e, f) = a
 second6 (a, b, c, d, e, f) = b
@@ -59,6 +63,7 @@ setFifth6 (a, b, c, d, e, f) x = (a, b, c, d, x, f)
 setSixth6 (a, b, c, d, e, f) x = (a, b, c, d, e, x)
 toList6 = \(a, b, c, d, e, f) -> [a, b, c, d, e, f]
 fromList6 = \[a, b, c, d, e, f] -> (a, b, c, d, e, f)
+getters6 = (first6, second6, third6, fourth6, fifth6, sixth6)
 
 first7 (a, b, c, d, e, f, g) = a
 second7 (a, b, c, d, e, f, g) = b
@@ -76,6 +81,7 @@ setSixth7 (a, b, c, d, e, f, g) x = (a, b, c, d, e, x, g)
 setSeventh7 (a, b, c, d, e, f, g) x = (a, b, c, d, e, f, x)
 toList7 = \(a, b, c, d, e, f, g) -> [a, b, c, d, e, f, g]
 fromList7 = \[a, b, c, d, e, f, g] -> (a, b, c, d, e, f, g)
+getters7 = (first7, second7, third7, fourth7, fifth7, sixth7, seventh7)
 
 first8 (a, b, c, d, e, f, g, h) = a
 second8 (a, b, c, d, e, f, g, h) = b
@@ -95,6 +101,7 @@ setSeventh8 (a, b, c, d, e, f, g, h) x = (a, b, c, d, e, f, x, h)
 setEighth8 (a, b, c, d, e, f, g, h) x = (a, b, c, d, e, f, g, x)
 toList8 = \(a, b, c, d, e, f, g, h) -> [a, b, c, d, e, f, g, h]
 fromList8 = \[a, b, c, d, e, f, g, h] -> (a, b, c, d, e, f, g, h)
+getters8 = (first8, second8, third8, fourth8, fifth8, sixth8, seventh8, eighth8)
 
 first9 (a, b, c, d, e, f, g, h, i) = a
 second9 (a, b, c, d, e, f, g, h, i) = b
@@ -116,6 +123,7 @@ setEighth9 (a, b, c, d, e, f, g, h, i) x = (a, b, c, d, e, f, g, x, i)
 setNinth9 (a, b, c, d, e, f, g, h, i) x = (a, b, c, d, e, f, g, h, x)
 toList9 = \(a, b, c, d, e, f, g, h, i) -> [a, b, c, d, e, f, g, h, i]
 fromList9 = \[a, b, c, d, e, f, g, h, i] -> (a, b, c, d, e, f, g, h, i)
+getters9 = (first9, second9, third9, fourth9, fifth9, sixth9, seventh9, eighth9, ninth9)
 
 first10 (a, b, c, d, e, f, g, h, i, j) = a
 second10 (a, b, c, d, e, f, g, h, i, j) = b
@@ -139,4 +147,5 @@ setNinth10 (a, b, c, d, e, f, g, h, i, j) x = (a, b, c, d, e, f, g, h, x, j)
 setTenth10 (a, b, c, d, e, f, g, h, i, j) x = (a, b, c, d, e, f, g, h, i, x)
 toList10 = \(a, b, c, d, e, f, g, h, i, j) -> [a, b, c, d, e, f, g, h, i, j]
 fromList10 = \[a, b, c, d, e, f, g, h, i, j] -> (a, b, c, d, e, f, g, h, i, j)
+getters10 = (first10, second10, third10, fourth10, fifth10, sixth10, seventh10, eighth10, ninth10, tenth10)
 
