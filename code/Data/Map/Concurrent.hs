@@ -19,8 +19,6 @@ shardMap = first3
 shards = second3
 hash = third3
 
-selectShard :: k -> (Map k v) -> (RWLock, IORef (Map.Map k v))
-selectShard = \key map -> ((Map.!) (shardMap map) (mod (hash map key) (shards map)))
 
 empty :: Int -> (k -> Int) -> IO (Map k v)
 empty = \shards hash -> do 
@@ -30,6 +28,9 @@ empty = \shards hash -> do
         (return (lock, shard))}
     submaps <- (mapM id (List.replicate shards submap))
     (return (Map.fromList (zip (ListExt.range0 shards) submaps), shards, hash))
+
+selectShard :: k -> (Map k v) -> (RWLock, IORef (Map.Map k v))
+selectShard = \key map -> ((Map.!) (shardMap map) (mod (hash map key) (shards map)))
 
 lookup :: Ord k => k -> (Map k v) -> IO (Maybe v)
 lookup = \key map -> do
