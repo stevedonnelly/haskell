@@ -2,6 +2,7 @@ module Network.Socket.Extensions where
 import Control.Concurrent
 import Control.Exception
 import Data.List as List
+import System.IO
 import Network.Socket
 
 extended_hints = defaultHints {addrFlags = [AI_ADDRCONFIG], addrSocketType = Stream}
@@ -32,6 +33,18 @@ listeningSocket = \port -> do
     (bind socket (SockAddrInet (toPortNumber port) iNADDR_ANY))
     (listen socket maxListenQueue)
     (return socket)
+
+acceptHandle :: Socket -> IO (Socket, SockAddr, Handle)
+acceptHandle = \socket -> do 
+    (socket, addr) <- (accept socket)
+    handle <- (socketToHandle socket ReadWriteMode)
+    (return (socket, addr, handle))
+
+acceptBufferedHandle :: Socket -> BufferMode -> IO (Socket, SockAddr, Handle)
+acceptBufferedHandle = \socket mode -> do 
+    (socket, addr, handle) <- (acceptHandle socket)
+    (hSetBuffering handle mode)
+    (return (socket, addr, handle))
     
 clientSocket :: String -> String -> IO Socket
 clientSocket = \host port -> do
@@ -47,5 +60,16 @@ clientSocket = \host port -> do
         (return socket)}
     (catch doConnect handleConnectFailureTyped)
 
+clientHandle :: String -> String -> IO (Socket, Handle)
+clientHandle = \host port -> do 
+    socket <- (clientSocket host port)
+    handle <- (socketToHandle socket ReadWriteMode) 
+    (return (socket, handle))
+
+clientBufferedHandle :: String -> String -> BufferMode -> IO (Socket, Handle)
+clientBufferedHandle = \host port mode -> do 
+    (socket, handle) <- (clientHandle host port)
+    (hSetBuffering handle mode)
+    (return (socket, handle))
 
 
