@@ -1,7 +1,13 @@
 module Control.Concurrent.MVar.Extensions where
 import Control.Concurrent.MVar as MVar
+import Data.Maybe as Maybe
 import Prelude.Extensions as PreludeExt
 
+
+tryReadMaybeMVar :: MVar (Maybe a) -> IO (Maybe a)
+tryReadMaybeMVar = \mvar -> do 
+    success <- (MVar.tryReadMVar mvar)
+    (return (ifElse (Maybe.isJust success) (Maybe.fromJust success) Nothing))
 
 writeMVar :: MVar a -> a -> IO ()
 writeMVar = \mvar value -> do 
