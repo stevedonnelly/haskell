@@ -9,7 +9,6 @@ import Data.Ratio as Ratio
 import Data.Set as Set
 import Debug.Trace as Trace
 import System.IO.Unsafe as Unsafe
-import System.Random as Random
 
 
 ifElse = \boolean a b -> if boolean then a else b
@@ -46,8 +45,6 @@ readDouble :: String -> Double
 readDouble = read
 readRational :: String -> Rational
 readRational = ((.) toRational readDouble)
-
-random = \x -> (toRational ((%) (mod ((unsafePerformIO randomIO) :: Int) 999999999) 999999999))
 
 noop :: IO ()
 noop = (return ())
