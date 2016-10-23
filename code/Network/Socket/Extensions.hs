@@ -1,4 +1,5 @@
 module Network.Socket.Extensions where
+import Control.Applicative
 import Control.Concurrent
 import Control.Exception
 import Data.ByteString as ByteString
@@ -77,6 +78,7 @@ clientBufferedHandle = \host port mode -> do
     (hSetBuffering handle mode)
     (return (socket, handle))
 
+-- TODO: improve exception handling, dont know enough about haskell exceptions at the moment
 sendMessage :: Serialize a => Socket -> a -> IO ()
 sendMessage = \socket message -> do 
     let bytes = (encode message)
@@ -86,13 +88,15 @@ sendMessage = \socket message -> do
     bytes_sent <- (ByteStringSocket.send socket bytes)
     (doIf ((/=) length bytes_sent) (throwIO (AssertionFailed "socket error")))
 
-recvMessage :: Serialize a => Socket -> IO a
-recvMessage = \socket -> do
+recvMessageBytes :: Socket -> IO ByteString
+recvMessageBytes = \socket -> do
     let header_length = (ByteString.length (encode (0 :: Int)))
     header <- (ByteStringSocket.recv socket header_length)
     let message_length = (right (decode header)) :: Int
     bytes <- (ByteStringSocket.recv socket message_length)
     (doIf ((/=) message_length (ByteString.length bytes)) (throwIO (AssertionFailed "socket error")))
-    (return (right (decode bytes)))
+    (return bytes)
 
+recvMessage :: Serialize a => Socket -> IO a
+recvMessage = \socket -> (liftA ((.) right decode) (recvMessageBytes socket))
 
