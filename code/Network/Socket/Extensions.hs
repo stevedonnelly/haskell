@@ -1,9 +1,14 @@
 module Network.Socket.Extensions where
 import Control.Concurrent
 import Control.Exception
+import Data.ByteString as ByteString
+import Data.Either.Extensions as EitherExt
 import Data.List as List
+import Data.Serialize
+import Network.Socket as Socket
+import qualified Network.Socket.ByteString as ByteStringSocket
+import Prelude.Extensions as PreludeExt
 import System.IO
-import Network.Socket
 
 extended_hints = defaultHints {addrFlags = [AI_ADDRCONFIG], addrSocketType = Stream}
 
@@ -71,5 +76,23 @@ clientBufferedHandle = \host port mode -> do
     (socket, handle) <- (clientHandle host port)
     (hSetBuffering handle mode)
     (return (socket, handle))
+
+sendMessage :: Serialize a => Socket -> a -> IO ()
+sendMessage = \socket message -> do 
+    let bytes = (encode message)
+    let length = (ByteString.length bytes)
+    let header = (encode length)
+    header_sent <- (ByteStringSocket.send socket header)
+    bytes_sent <- (ByteStringSocket.send socket bytes)
+    (doIf ((/=) length bytes_sent) (throwIO (AssertionFailed "socket error")))
+
+recvMessage :: Serialize a => Socket -> IO a
+recvMessage = \socket -> do
+    let header_length = (ByteString.length (encode (0 :: Int)))
+    header <- (ByteStringSocket.recv socket header_length)
+    let message_length = (right (decode header)) :: Int
+    bytes <- (ByteStringSocket.recv socket message_length)
+    (doIf ((/=) message_length (ByteString.length bytes)) (throwIO (AssertionFailed "socket error")))
+    (return (right (decode bytes)))
 
 
