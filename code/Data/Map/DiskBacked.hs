@@ -2,6 +2,7 @@ module Data.Map.DiskBacked where
 import Control.Applicative
 import Control.Concurrent.MVar as MVar
 import qualified Data.Cache.LRU as LRU
+import qualified Data.Cache.LRU.Extensions as LRUExt
 import Data.Generics.Aliases as Generics
 import qualified Data.List as List
 import Data.Maybe as Maybe
@@ -106,7 +107,7 @@ unsetBackingFile = \key map handle -> do
 
 insertWithLock :: Ord k => k -> v -> Map k v -> LRU.LRU k v -> Handle -> IO (LRU.LRU k v)
 insertWithLock = \key value map lru backing_file -> do
-    let (next, dropped) = (LRU.insertInforming key value lru)
+    let (next, dropped) = (LRUExt.insertInforming key value lru)
     let (drop_key, drop_value) = (fromJust dropped)
     let write = (writeToBackingFile drop_key drop_value map backing_file)
     (ifElse (isJust dropped) write noop)
