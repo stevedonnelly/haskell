@@ -1,0 +1,11 @@
+
+A large collection of extensions to the Haskell standard library as well as
+libraries from hackage.
+
+Mostly consists of simple, commonly used wrappers in my personal projects.
+
+There's quite a bit of variance in terms of code-quality: some of the older
+modules (from when I was learning haskell) could use some polish with newly
+acquired knowledge, and some of the newer modules could use better naming.
+
+
