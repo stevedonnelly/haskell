@@ -47,7 +47,7 @@ setFourth5 (a, b, c, d, e) x = (a, b, c, x, e)
 setFifth5 (a, b, c, d, e) x = (a, b, c, d, x)
 toList5 = \(a, b, c, d, e) -> [a, b, c, d, e]
 fromList5 = \[a, b, c, d, e] -> (a, b, c, d, e)
-getters5 = (first5, second5, third5, fourth4, fifth5)
+getters5 = (first5, second5, third5, fourth5, fifth5)
 
 first6 (a, b, c, d, e, f) = a
 second6 (a, b, c, d, e, f) = b

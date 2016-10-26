@@ -17,20 +17,20 @@ type (Map key value) = (
     key -> Int)
 shardMap = first3
 shards = second3
-hash = third3
+hashFunction = third3
 
 
 empty :: Int -> (k -> Int) -> IO (Map k v)
-empty = \shards hash -> do 
+empty = \shards hashFunction -> do 
     let {submap = do
         lock <- RWLock.new
         shard <- (IORef.newIORef Map.empty)
         (return (lock, shard))}
     submaps <- (mapM id (List.replicate shards submap))
-    (return (Map.fromList (zip (ListExt.range0 shards) submaps), shards, hash))
+    (return (Map.fromList (zip (ListExt.range0 shards) submaps), shards, hashFunction))
 
 selectShard :: k -> (Map k v) -> (RWLock, IORef (Map.Map k v))
-selectShard = \key map -> ((Map.!) (shardMap map) (mod (hash map key) (shards map)))
+selectShard = \key map -> ((Map.!) (shardMap map) (mod (hashFunction map key) (shards map)))
 
 lookup :: Ord k => k -> (Map k v) -> IO (Maybe v)
 lookup = \key map -> do
