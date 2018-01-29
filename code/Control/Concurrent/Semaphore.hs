@@ -43,7 +43,7 @@ takeLeasesGenerously = \(counter, lock, signal) leases -> do
     current <- (MVar.readMVar counter)
     let available = ((>=) current leases) 
     remaining <- (doIfElse available (addAndGet counter (negate leases)) current)
-    (doIf available (MVar.tryPutMVar signal ()))
+    (doIf ((>) remaining 0) (MVar.tryPutMVar signal ()))
     (MVar.putMVar lock ())
     (doIf (not available) (takeLeasesGenerously (counter, lock, signal) leases))
 
